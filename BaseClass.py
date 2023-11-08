@@ -3,6 +3,8 @@ import os
 import subprocess
 import requests
 import hashlib
+from selenium import webdriver
+
 
 logger = logSetup.log("BaseClass","log.txt")
 
@@ -92,3 +94,19 @@ class BaseClass:
             logger.info(f"Done saving the image {FileName}")
         else:
             logger.error(f"can't download the image {URL} ")
+
+
+    @staticmethod
+    def CreatWebDriver(DriverPath, HeadLess=None):
+        if BaseClass.checkIfFileExist(DriverPath):
+            firefox_options = webdriver.FirefoxOptions()
+            if HeadLess:
+                firefox_options.add_argument('--headless')
+            firefox_driver_path = DriverPath
+            firefox_service = webdriver.firefox.service.Service(firefox_driver_path)
+            return webdriver.Firefox(service=firefox_service, options=firefox_options)
+        else:
+            logger.error("Can't find Driver Path")
+
+
+            
