@@ -2,6 +2,7 @@ import logSetup
 import os
 import subprocess
 import requests
+import hashlib
 
 logger = logSetup.log("BaseClass","log.txt")
 
@@ -21,7 +22,10 @@ class BaseClass:
 
     @staticmethod
     def checkIfFileExist(Path):
-        return os.path.isfile(Path)
+        if Path:
+            return os.path.isfile(Path)
+        else:
+            return False
     
     @staticmethod
     def checkIfDir(dirPath):

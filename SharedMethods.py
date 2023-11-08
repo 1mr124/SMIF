@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-import logSetup
-import requests
 from BaseClass import * 
 
 logger = logSetup.log("SharedMethods","log.txt")
@@ -21,10 +19,12 @@ class Image():
         if BaseClass.checkResponseResult(response) and self.FileName:
             ImageData = response.content
             BaseClass.WriteImage(self.FileName, ImageData)
+            self.Path = self.FileName
             self.logger.info(f"Done saving the image {self.FileName}")
+            return True
         else:
             self.logger.error(f"can't download the image {self.URL} ")
-
+            return False
 
     def DownloadListOfImages(self):
         if self.UrlList:
@@ -34,12 +34,34 @@ class Image():
                 self.FileName = str(tempImageName)
                 self.DownloadImage()
                 tempImageName += 1
+            else:
+                self.logger.info("Done Downloading all the Images")
+                return True
 
-    def CompareImages(self, Image1, Image2):
-        pass
+    def isTheSameImage(Image1, Image2):
+        if not (Image1.Hash and Image2.Hash):
+            imag1Hash = Image1.GenerateImageHash()
+            image2hash = Image2.GenerateImageHash()
+        
+        if Image1.Hash == Image2.Hash:
+            return True
+        else:
+            return False
+            
+
+            
 
     def GenerateImageHash(self):
-        pass
+        if BaseClass.checkIfFileExist(self.Path) :
+            md5Hash = hashlib.md5()
+            with open(self.Path, "rb") as imageFile:
+                for chunk in iter(lambda: imageFile.read(4096), b""):
+                    md5Hash.update(chunk)
+            self.Hash = md5Hash.hexdigest()
+            self.logger.info("Done generating the hash value")
+            return self.Hash
+        else:
+            self.logger.info("can't find the image path")
 
 class File:
     def __init__(self, FilePath=None):
@@ -55,3 +77,8 @@ class File:
 
     def GenerateFileHash(self):
         pass
+
+
+if __name__ == "__main__":
+    print("hello")
+ 
