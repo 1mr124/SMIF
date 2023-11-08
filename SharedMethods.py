@@ -48,8 +48,7 @@ class Image():
         else:
             return False
             
-
-            
+   
 
     def GenerateImageHash(self):
         if BaseClass.checkIfFileExist(self.Path) :
@@ -64,17 +63,14 @@ class Image():
             self.logger.info("can't find the image path")
 
 class File:
-    def __init__(self, FilePath=None):
-        self.logger = logger.log()
-        self.Path = FilePath
-
+    def __init__(self):
+        pass
 
     def DownloadFile(self):
-        self.logger.info("fuck from the File")
+        pass
     
     def CompareFile(self):
-        print(self.Path)
-
+        pass
     def GenerateFileHash(self):
         pass
 
