@@ -2,6 +2,12 @@
 
 import SharedMethods
 import json
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+
+
 
 webdriverPath = "/home/mr124/Documents/geckodriver"
 profilePath =  "/home/mr124/Project/SocialMediaInvestigationFramework/WhatsAppProfile"
@@ -63,7 +69,38 @@ class WhatsApp():
         driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath)
         driver.get(self.whatsAppUrl)
         self.logger.info("now opened whatsApp")
+        self.driver = driver
+        return True
         
+    def checkIfWhatsAppLoaded(self):
+        try:
+            element = WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "_3WByx")))
+            if element:
+                self.logger.info("whatsApp page loaded")
+                return True
+        except TimeoutException as e:
+            self.logger.error("Time out on loading whatsApp")
+
+
+    def findElementByXpath(self, xpath):
+        try:
+            element = self.driver.find_element(By.XPATH, xpath)
+            if element:
+                return element
+            else:
+                return False
+        except:
+            self.logger.error("can't find element")
+
+    def findElementByClass(self, ClassName):
+        try:
+            element = driver.find_element(By.CLASS_NAME, ClassName)
+            if element:
+                return element
+            else:
+                return False
+        except:
+            self.logger.error("can't find element")
 
     
     def sendMessage(self):
@@ -77,7 +114,6 @@ class WhatsApp():
 
     def CheckIfUserChagedProfilePic(self):
         pass
-
 
 
 
