@@ -4,6 +4,9 @@ import subprocess
 import requests
 import hashlib
 from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.webdriver import WebDriver
 
 
 logger = logSetup.log("BaseClass","log.txt")
@@ -97,16 +100,13 @@ class BaseClass:
 
 
     @staticmethod
-    def CreatWebDriver(DriverPath, HeadLess=None):
-        if BaseClass.checkIfFileExist(DriverPath):
-            firefox_options = webdriver.FirefoxOptions()
-            if HeadLess:
-                firefox_options.add_argument('--headless')
-            firefox_driver_path = DriverPath
-            firefox_service = webdriver.firefox.service.Service(firefox_driver_path)
-            return webdriver.Firefox(service=firefox_service, options=firefox_options)
+    def CreatWebDriver(DriverPath, profilePath, HeadLess=None):
+        if BaseClass.checkIfFileExist(DriverPath) and BaseClass.checkIfDir(profilePath) :
+            options = Options()
+            options.add_argument('--profile')
+            options.add_argument(profilePath)
+            return WebDriver(service=Service(DriverPath), options=options)
         else:
-            logger.error("Can't find Driver Path")
+            logger.error("Can't find Driver Path or profile directory")
 
 
-            
