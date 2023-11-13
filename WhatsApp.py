@@ -16,11 +16,22 @@ logger = SharedMethods.logSetup.log("whatsApp","log.txt")
 
 
 class WhatsApp():
-    def __init__(self,):
+    def __init__(self, phoneNumber=None, name=None):
         self.logger = logger
         self.webdriverPath = webdriverPath
         self.profilePath = profilePath
+        self.newChatXpath = '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/div/span'
+        self.searchXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div[2]/div[2]/div/div[1]/p'
+        self.smallImageXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[1]/div/div/img'
+        self.aboutXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[2]/div[2]/div[1]/span'
+        self.imageIfCoverXpath = '//*[@id="app"]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
+        self.imageIfNoCoverXpath = '//*[@id="app"]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[1]/div/img'
+        self.imageCoverXpath = '//*[@id="app"]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[1]/div'
+        self.contactDivXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[2]'
+        self.contactXpath = '//*[@id="main"]/header/div[2]'
         self.whatsAppUrl = "https://web.whatsapp.com"
+        self.phoneNumber = phoneNumber
+        self.name = self.name
 
     def saveCookie(self, cookieFileName ,cookies):
         if cookies:
@@ -102,7 +113,57 @@ class WhatsApp():
         except:
             self.logger.error("can't find element")
 
+    def searchContact(self):
+        try:
+            newChatElement = self.findElementByXpath(self.newChatXpath)
+            newChatElement.click()
+            searchElement = self.findElementByXpath(self.searchXpath)
+            searchElement.click()
+            searchElement.send_keys(self.phoneNumber)
+            return True
+        except:
+            self.logger.error("can't find contact")
+            return False
     
+    def openContact(self):
+        pass
+
+
+    def getUrlFromElement(self):
+        pass # return url from element
+
+    def getSmallImageUrl(self):
+        # set the value of the small image url MUSTH RUN AFTER OPEN CONTACT
+        try:
+            smallImageElement = self.findElementByXpath(self.smallImageXpath)
+            smallImageUrl = self.getUrlFromElement(smallImageElement)
+            self.smallImageUrl = smallImageUrl
+            return True
+        except:
+            self.logger.error("can't find the small image")
+            return False
+    
+    def getAbout(self):
+        try:
+            aboutElemnet = self.findElementByXpath(self.aboutXpath)
+            if aboutElemnet:
+                self.about = aboutElemnet.text
+                return True
+            else:
+                self.logger.error("can't find about element")
+        except:
+            self.logger.error("can't get about ")
+        
+    def findImageLink(self):
+        try:
+            contactDivElement = self.findElementByXpath(self.contactDivXpath).click()
+
+            imageXpaht = ""
+            imageElement = self.findElementByXpath()
+        except:
+            self.logger.error("can't find the image")
+            return False
+
     def sendMessage(self):
         pass
 
