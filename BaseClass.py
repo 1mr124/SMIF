@@ -9,6 +9,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.webdriver import WebDriver
 
 
+
 logger = logSetup.log("BaseClass","log.txt")
 
 class BaseClass:
@@ -103,6 +104,9 @@ class BaseClass:
     def CreatWebDriver(DriverPath, profilePath, HeadLess=None):
         if BaseClass.checkIfFileExist(DriverPath) and BaseClass.checkIfDir(profilePath) :
             options = Options()
+            if HeadLess:
+                options.add_argument("-headless") 
+                print("headless")
             options.add_argument('--profile')
             options.add_argument(profilePath)
             return WebDriver(service=Service(DriverPath), options=options)

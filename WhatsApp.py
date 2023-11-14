@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
+from time import sleep
 
 
 
@@ -22,11 +23,10 @@ class XPath():
         self.searchXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div[2]/div[2]/div/div[1]/p'
         self.smallImageXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[1]/div/div/img'
         self.aboutXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[2]/div[2]/div[1]/span'
-        self.imageIfCoverXpath = '//*[@id="app"]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
-        self.imageIfNoCoverXpath = '//*[@id="app"]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[1]/div/img'
-        self.imageCoverXpath = '//*[@id="app"]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[1]/div'
-        self.contactDivXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[2]'
-        self.contactXpath = '//*[@id="main"]/header/div[2]'
+        self.contactDivXpath = '/html/body/div[1]/div/div/div[5]/div/header/div[2]'
+        self.imageDivXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]'
+        self.imageIfCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
+        self.imageIfNoCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[1]/div/img'
         self.whatsAppUrl = "https://web.whatsapp.com"
 
 
@@ -81,8 +81,8 @@ class WhatsApp(Person,XPath):
                 self.logger.info("done adding the cookies")
         return driver
 
-    def creatWhatssAppDriver(self):
-        driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath)
+    def creatWhatssAppDriver(self, HeadLess=None):
+        driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath, HeadLess=HeadLess)
         driver.get(self.Xpath.whatsAppUrl)
         self.logger.info("now opened whatsApp")
         self.driver = driver
@@ -123,7 +123,7 @@ class WhatsApp(Person,XPath):
         actions.send_keys(word)
         actions.perform()
 
-    def OpenContact(self):
+    def OpenContactViaUrl(self):
         try:
             print("hello")
             print(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
@@ -133,16 +133,55 @@ class WhatsApp(Person,XPath):
             self.logger.error("can't find contact")
             return False
     
+    def searchContact(self):
+        try:
+            newChatElement = self.findElementByXpath(self.Xpath.newChatXpath)
+            newChatElement.click()
+            searchElement = self.findElementByXpath(self.Xpath.searchXpath)
+            searchElement.click()
+            self.sendKeys(word=self.Person.phoneNumber)
+            self.logger.info("done searching for contact ")
+            sleep(3)
+            return True
+        except:
+            self.logger.error("can't find contact")
+            return False
 
-    def getUrlFromElement(self):
-        pass # return url from element
+    def OpenContact(self):
+        try:
+            smallImageElement = self.findElementByXpath(self.Xpath.smallImageXpath)
+            smallImageElement.click()
+            self.logger.info("Done opening the contact chat")
+            return True
+        except:
+            self.logger.error("error in opening the contact chat")
+
+
+    def OpenContactInfo(self):
+        try:
+            contactDiv = self.findElementByXpath(self.Xpath.contactDivXpath)
+            contactDiv.click()
+            self.logger.info("done opeing the about")
+            return True
+        except:
+            self.logger.error("can't open the contact Info")
+    
+    def getUrlFromimg(self, element):
+        try:
+            if element.tag_name == 'img':
+                return element.get_attribute('src')
+        except:
+            self.logger.error("can't find url from the element")
+            return False
+        
 
     def getSmallImageUrl(self):
         # set the value of the small image url MUSTH RUN AFTER OPEN CONTACT
         try:
             smallImageElement = self.findElementByXpath(self.Xpath.smallImageXpath)
-            smallImageUrl = self.getUrlFromElement(smallImageElement)
+            smallImageUrl = self.getUrlFromimg(element=smallImageElement)
             self.smallImageUrl = smallImageUrl
+            self.logger.info("Done finding small image url")
             return True
         except:
             self.logger.error("can't find the small image")
@@ -153,6 +192,7 @@ class WhatsApp(Person,XPath):
             aboutElemnet = self.findElementByXpath(self.Xpath.aboutXpath)
             if aboutElemnet:
                 self.about = aboutElemnet.text
+                self.logger.info("done finding about")
                 return True
             else:
                 self.logger.error("can't find about element")
@@ -161,12 +201,17 @@ class WhatsApp(Person,XPath):
         
     def findImageLink(self):
         try:
-            contactDivElement = self.findElementByXpath(self.Xpath.contactDivXpath).click()
-
-            imageXpaht = ""
-            imageElement = self.findElementByXpath()
+            imageElement = self.findElementByXpath(self.Xpath.imageDivXpath)
+            imgs = imageElement.find_elements(by='xpath', value='.//img')
+            if imgs:
+                imageUrl = self.getUrlFromimg(imgs[0])
+                self.imageUrl = imageUrl
+                self.logger.info("done finding the image url")
+                return True
+            else:
+                self.logger.error("can't find img url")
         except:
-            self.logger.error("can't find the image")
+            self.logger.error("can't find the big image url")
             return False
 
     def sendMessage(self):
@@ -187,4 +232,21 @@ class WhatsApp(Person,XPath):
 
 if __name__ == "__main__":
     print("hello")
+    x = WhatsApp(name="",phoneNumber="")
+    x.creatWhatssAppDriver()
+    x.checkIfWhatsAppLoaded()
+    x.searchContact()
+    x.getAbout()
+    x.getSmallImageUrl()
+    x.OpenContact()
+    x.OpenContactInfo()
+    x.findImageLink()
+    print(x.about, x.smallImageUrl, x.imageUrl,sep="\n")
+    smallImage = SharedMethods.Image(ImageURL=x.smallImageUrl, ImageName=f'small{x.Person.name}')
+    BigImage = SharedMethods.Image(ImageURL=x.imageUrl, ImageName=f'big{x.Person.name}')
+    smallImage.DownloadImage()
+    BigImage.DownloadImage()
+
+    i = input("quite: ")
+    x.driver.quit()
     
