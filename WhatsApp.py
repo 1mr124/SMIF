@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
 import SharedMethods
+from Person import *
 import json
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 
@@ -14,12 +16,8 @@ profilePath =  "/home/mr124/Project/SocialMediaInvestigationFramework/WhatsAppPr
 
 logger = SharedMethods.logSetup.log("whatsApp","log.txt")
 
-
-class WhatsApp():
-    def __init__(self, phoneNumber=None, name=None):
-        self.logger = logger
-        self.webdriverPath = webdriverPath
-        self.profilePath = profilePath
+class XPath():
+    def __init__(self):
         self.newChatXpath = '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/div/span'
         self.searchXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div[2]/div[2]/div/div[1]/p'
         self.smallImageXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[1]/div/div/img'
@@ -30,8 +28,15 @@ class WhatsApp():
         self.contactDivXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[2]'
         self.contactXpath = '//*[@id="main"]/header/div[2]'
         self.whatsAppUrl = "https://web.whatsapp.com"
-        self.phoneNumber = phoneNumber
-        self.name = self.name
+
+
+class WhatsApp(Person,XPath):
+    def __init__(self, phoneNumber=None, name=None):
+        self.logger = logger
+        self.webdriverPath = webdriverPath
+        self.profilePath = profilePath
+        self.Xpath = XPath()
+        self.Person = Person(name=name,phoneNumber=phoneNumber)
 
     def saveCookie(self, cookieFileName ,cookies):
         if cookies:
@@ -55,7 +60,7 @@ class WhatsApp():
         
     def setupWhatsAppProfile(self):
         driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath)
-        driver.get(self.whatsAppUrl)
+        driver.get(self.Xpath.whatsAppUrl)
         self.logger.info("Link Your Device")
         SaveCookie = input("Done Linking Save the cookie?: Y/n ")
         if SaveCookie.lower() == "y" or SaveCookie.lower == 'yes':
@@ -78,14 +83,14 @@ class WhatsApp():
 
     def creatWhatssAppDriver(self):
         driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath)
-        driver.get(self.whatsAppUrl)
+        driver.get(self.Xpath.whatsAppUrl)
         self.logger.info("now opened whatsApp")
         self.driver = driver
         return True
         
     def checkIfWhatsAppLoaded(self):
         try:
-            element = WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "_3WByx")))
+            element = WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.CLASS_NAME, "_3WByx")))
             if element:
                 self.logger.info("whatsApp page loaded")
                 return True
@@ -112,22 +117,22 @@ class WhatsApp():
                 return False
         except:
             self.logger.error("can't find element")
+    
+    def sendKeys(self, word=None):
+        actions = ActionChains(self.driver)
+        actions.send_keys(word)
+        actions.perform()
 
-    def searchContact(self):
+    def OpenContact(self):
         try:
-            newChatElement = self.findElementByXpath(self.newChatXpath)
-            newChatElement.click()
-            searchElement = self.findElementByXpath(self.searchXpath)
-            searchElement.click()
-            searchElement.send_keys(self.phoneNumber)
+            print("hello")
+            print(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
+            self.driver.get(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
             return True
         except:
             self.logger.error("can't find contact")
             return False
     
-    def openContact(self):
-        pass
-
 
     def getUrlFromElement(self):
         pass # return url from element
@@ -135,7 +140,7 @@ class WhatsApp():
     def getSmallImageUrl(self):
         # set the value of the small image url MUSTH RUN AFTER OPEN CONTACT
         try:
-            smallImageElement = self.findElementByXpath(self.smallImageXpath)
+            smallImageElement = self.findElementByXpath(self.Xpath.smallImageXpath)
             smallImageUrl = self.getUrlFromElement(smallImageElement)
             self.smallImageUrl = smallImageUrl
             return True
@@ -145,7 +150,7 @@ class WhatsApp():
     
     def getAbout(self):
         try:
-            aboutElemnet = self.findElementByXpath(self.aboutXpath)
+            aboutElemnet = self.findElementByXpath(self.Xpath.aboutXpath)
             if aboutElemnet:
                 self.about = aboutElemnet.text
                 return True
@@ -156,7 +161,7 @@ class WhatsApp():
         
     def findImageLink(self):
         try:
-            contactDivElement = self.findElementByXpath(self.contactDivXpath).click()
+            contactDivElement = self.findElementByXpath(self.Xpath.contactDivXpath).click()
 
             imageXpaht = ""
             imageElement = self.findElementByXpath()
