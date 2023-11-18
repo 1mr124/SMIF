@@ -214,6 +214,29 @@ class WhatsApp(Person,XPath):
             self.logger.error("can't find the big image url")
             return False
 
+    def getAlluserInfo(self):
+        if self.name and self.phoneNumber:
+            x.checkIfWhatsAppLoaded()
+            x.searchContact()
+            x.getAbout()
+            x.getSmallImageUrl()
+            x.OpenContact()
+            x.OpenContactInfo()
+            x.findImageLink()
+        else:
+            self.logger.error("can't find user name or phoneNumber")
+
+    def downloadUesrImage(self):
+        if self.imageUrl and self.Person.name :
+            BigImage = SharedMethods.Image(ImageURL=self.imageUrl, ImageName=f'big{self.Person.name}')
+            BigImage.DownloadImage()
+    
+    def checkIfUserChangedPic(self):
+        current
+
+    def createUserFoldar(self):
+        pass # username foldar then whats twiiter etc - whatss > images: about:
+            
     def sendMessage(self):
         pass
 
@@ -232,21 +255,10 @@ class WhatsApp(Person,XPath):
 
 if __name__ == "__main__":
     print("hello")
-    x = WhatsApp(name="",phoneNumber="")
+    x = WhatsApp(name="mano",phoneNumber="+20 10 1964 9231")
     x.creatWhatssAppDriver()
-    x.checkIfWhatsAppLoaded()
-    x.searchContact()
-    x.getAbout()
-    x.getSmallImageUrl()
-    x.OpenContact()
-    x.OpenContactInfo()
-    x.findImageLink()
-    print(x.about, x.smallImageUrl, x.imageUrl,sep="\n")
-    smallImage = SharedMethods.Image(ImageURL=x.smallImageUrl, ImageName=f'small{x.Person.name}')
-    BigImage = SharedMethods.Image(ImageURL=x.imageUrl, ImageName=f'big{x.Person.name}')
-    smallImage.DownloadImage()
-    BigImage.DownloadImage()
-
+    x.getAlluserInfo()
+    x.downloadUesrImage()
     i = input("quite: ")
     x.driver.quit()
     
