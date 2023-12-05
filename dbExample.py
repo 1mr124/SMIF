@@ -13,3 +13,9 @@ person.whastappEntries = [whatsapp1, whatsapp2]
 session = Session()
 session.add(person)
 session.commit()
+
+
+
+# Adding profile pictures to a WhatsApp entity
+profile_pic1 = ProfilePic(path='pic1.jpg', entity_type='WhatsApp', entity_id=whatsapp_entity.id)
+profile_pic2 = ProfilePic(path='pic2.jpg', entity_type='WhatsApp', entity_id=whatsapp_entity.id)

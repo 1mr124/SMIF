@@ -11,7 +11,6 @@ class Person(Base):
     __tablename__ = 'person'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
-    age = Column(Integer)
     phoneNumber = Column(String(15))
     birthday = Column(String(10))
     country = Column(String(50))
@@ -21,12 +20,14 @@ class Person(Base):
     # Define one-to-many relationship with WhatsApp table
     whastappEntries = relationship('WhatsApp', back_populates='person')
     TwitterEntries = relationship('Twitter', back_populates='person')
+
 class WhatsApp(Base):
     __tablename__ = 'whatsApp'
     id = Column(Integer, primary_key=True)
-    ProfilePic = Column(String(100))
-    aboutStatus = Column(String(200))
+    CurrentProfilePic = Column(String(100))
+    CurrentAboutStatus = Column(String(200))
     phoneNumber = Column(String(15), nullable=False)
+    profilePics = relationship('ProfilePic', back_populates='whatsApp', cascade='all, delete-orphan')
 
     # Define the foreign key relationship
     personId = Column(Integer, ForeignKey('person.id'))
@@ -36,10 +37,25 @@ class WhatsApp(Base):
 class Twitter(Base):
     __tablename__ = 'Twitter'
     id = Column(Integer, primary_key=True)
-    ProfilePic = Column(String(100))
-    aboutStatus = Column(String(200))
+    CurrentProfilePic = Column(String(100))
+    CurrentBio = Column(String(200))
     userName = Column(String(15), nullable=False)
+    profilePics = relationship('ProfilePic', back_populates='Twitter', cascade='all, delete-orphan')
 
     # Define the foreign key relationship
     personId = Column(Integer, ForeignKey('person.id'))
     person = relationship('Person', back_populates='TwitterEntries')
+
+
+
+
+
+class ProfilePic(Base):
+    __tablename__ = 'profile_pics'
+    id = Column(Integer, primary_key=True)
+    path = Column(String(100))
+    entity_type = Column(String(50))  # Type of the associated entity (e.g., WhatsApp, Twitter, Facebook)
+    entity_id = Column(Integer)        # ID of the associated entity
+    created_at = Column(String(20), default=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+
