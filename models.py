@@ -18,16 +18,16 @@ class Person(Base):
     creationTime    = Column(DateTime , default = datetime.now())
 
     # Define one-to-many relationship with WhatsApp table
-    whastappEntries = relationship('WhatsApp', back_populates='person')
+    whastappEntries = relationship('whatsApp', back_populates='person')
     TwitterEntries = relationship('Twitter', back_populates='person')
 
-class WhatsApp(Base):
+class whatsApp(Base):
     __tablename__ = 'whatsApp'
     id = Column(Integer, primary_key=True)
     CurrentProfilePic = Column(String(100))
     CurrentAboutStatus = Column(String(200))
     phoneNumber = Column(String(15), nullable=False)
-    profilePics = relationship('ProfilePic', back_populates='whatsApp', cascade='all, delete-orphan')
+    profilePics = relationship('ProfilePic', back_populates='whatsapp', cascade='all, delete-orphan')
 
     # Define the foreign key relationship
     personId = Column(Integer, ForeignKey('person.id'))
@@ -40,7 +40,7 @@ class Twitter(Base):
     CurrentProfilePic = Column(String(100))
     CurrentBio = Column(String(200))
     userName = Column(String(15), nullable=False)
-    profilePics = relationship('ProfilePic', back_populates='Twitter', cascade='all, delete-orphan')
+    profilePics = relationship('ProfilePic', back_populates='twitter', cascade='all, delete-orphan')
 
     # Define the foreign key relationship
     personId = Column(Integer, ForeignKey('person.id'))
@@ -51,11 +51,19 @@ class Twitter(Base):
 
 
 class ProfilePic(Base):
-    __tablename__ = 'profile_pics'
+    __tablename__ = 'ProfilePic'
     id = Column(Integer, primary_key=True)
+    whatsappId = Column(Integer, ForeignKey('whatsApp.id'))
+    whatsapp = relationship('whatsApp', back_populates='profilePics')
+    
+    TwitterId = Column(Integer, ForeignKey('Twitter.id'))
+    twitter = relationship('Twitter', back_populates='profilePics')
+    
     path = Column(String(100))
     entity_type = Column(String(50))  # Type of the associated entity (e.g., WhatsApp, Twitter, Facebook)
     entity_id = Column(Integer)        # ID of the associated entity
     created_at = Column(String(20), default=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    hash = Column(String(32))
+
 
 
