@@ -168,3 +168,4 @@ cython_debug/
 tmp/
 SMIF.db
 this.db
+geckodriver

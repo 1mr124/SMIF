@@ -12,21 +12,28 @@ from time import sleep
 
 
 
-webdriverPath = "/home/mr124/Documents/geckodriver"
-profilePath =  "/home/mr124/Project/SocialMediaInvestigationFramework/WhatsAppProfile"
+webdriverPath = "/home/mr124/Documents/Projects/SocialMediaInvestigationFramework/geckodriver"
+profilePath =  "/home/mr124/Documents/Projects/SocialMediaInvestigationFramework/WhatsAppProfile"
 
 logger = SharedMethods.logSetup.log("whatsApp","log.txt")
 
 class XPath():
     def __init__(self):
-        self.newChatXpath = '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/div/span'
-        self.searchXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div[2]/div[2]/div/div[1]/p'
-        self.smallImageXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[1]/div/div/img'
+        # Xpath Part
+        self.newChatXpath = '//*[@id="side"]/div[1]/div/div[2]/div[2]/div'
+        self.searchXpath = '//*[@id="side"]/div[1]/div/div[2]/div[2]/div/div[1]/p'
+        self.smallImageXpath = '/html/body/div[1]/div/div[2]/div[3]/div/div[2]/div[1]/div/div/div[3]/div/div/div/div[1]/div/div/div/img'
         self.aboutXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[2]/div[2]/div[1]/span'
         self.contactDivXpath = '/html/body/div[1]/div/div/div[5]/div/header/div[2]'
         self.imageDivXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]'
         self.imageIfCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
         self.imageIfNoCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[1]/div/img'
+        # Selector Part
+        self.smallImgACP='#main > header > div._2pr2H > div > img' # ACP after chat is opened
+        self.contactDiv='#main > header > div._2au8k'
+        self.BigImage='#app > div > div.three._1jJ70 > div._2Ts6i._1xFRo > span > div > span > div > div > section > div.gsqs0kct.oauresqk.efgp0a3n.h3bz2vby.g0rxnol2.tvf2evcx.oq44ahr5.lb5m6g5c.brac1wpa.lkjmyc96.b8cdf3jl.bcymb0na.myel2vfb.e8k79tju > div.p357zi0d.ac2vgrno.pz0xruzv > div > img'
+        self.About='#app > div > div.three._1jJ70 > div._2Ts6i._1xFRo > span > div > span > div > div > section > div.gsqs0kct.oauresqk.efgp0a3n.h3bz2vby.g0rxnol2.tvf2evcx.oq44ahr5.lb5m6g5c.brac1wpa.lkjmyc96.i4pc7asj.bcymb0na.myel2vfb.e8k79tju > span > span'
+
         self.whatsAppUrl = "https://web.whatsapp.com"
 
 
@@ -80,22 +87,39 @@ class WhatsApp(Person,XPath):
             else:
                 self.logger.info("done adding the cookies")
         return driver
-
+            
     def creatWhatssAppDriver(self, HeadLess=None):
-        driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath, HeadLess=HeadLess)
-        driver.get(self.Xpath.whatsAppUrl)
-        self.logger.info("now opened whatsApp")
-        self.driver = driver
-        return True
+        try:
+            driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath, HeadLess=HeadLess)
+            driver.get(self.Xpath.whatsAppUrl)
+            self.logger.info("now opened whatsApp")
+            self.driver = driver
+            return True
+        except:
+            self.logger.error("Couldn't create Driver")
+            return False
+        
+    def creatWebDriver(self, HeadLess=None):
+        try:
+            driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath, HeadLess=HeadLess)
+            self.logger.info("now opened Web driver")
+            self.driver = driver
+            return True
+        except:
+            self.logger.error("Couldn't create Driver")
+            return False
         
     def checkIfWhatsAppLoaded(self):
         try:
             element = WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.CLASS_NAME, "_3WByx")))
             if element:
                 self.logger.info("whatsApp page loaded")
+                sleep(3)
                 return True
         except TimeoutException as e:
             self.logger.error("Time out on loading whatsApp")
+        except Exception as e:
+            self.logger.error(f'error {e}')
 
 
     def findElementByXpath(self, xpath):
@@ -215,9 +239,8 @@ class WhatsApp(Person,XPath):
             return False
 
     def getAlluserInfo(self):
-        if self.name and self.phoneNumber:
+        if self.Person.name and self.Person.phoneNumber:
             x.checkIfWhatsAppLoaded()
-            x.searchContact()
             x.getAbout()
             x.getSmallImageUrl()
             x.OpenContact()
@@ -227,12 +250,15 @@ class WhatsApp(Person,XPath):
             self.logger.error("can't find user name or phoneNumber")
 
     def downloadUesrImage(self):
-        if self.imageUrl and self.Person.name :
-            BigImage = SharedMethods.Image(ImageURL=self.imageUrl, ImageName=f'big{self.Person.name}')
-            BigImage.DownloadImage()
-    
+        try:
+            if self.imageUrl and self.Person.name :
+                BigImage = SharedMethods.Image(ImageURL=self.imageUrl, ImageName=f'big{self.Person.name}')
+                BigImage.DownloadImage()
+        except Exception as e:
+            self.logger.error(f'Error {e}')
+
     def checkIfUserChangedPic(self):
-        current
+        pass
 
     def createUserFoldar(self):
         pass # username foldar then whats twiiter etc - whatss > images: about:
@@ -256,9 +282,10 @@ class WhatsApp(Person,XPath):
 if __name__ == "__main__":
     print("hello")
     x = WhatsApp(name="mano",phoneNumber="+20 10 1964 9231")
-    x.creatWhatssAppDriver()
+    x.creatWebDriver()
+    x.OpenContactViaUrl()
     x.getAlluserInfo()
-    x.downloadUesrImage()
+#    x.downloadUesrImage()
     i = input("quite: ")
     x.driver.quit()
     
