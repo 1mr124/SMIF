@@ -12,8 +12,8 @@ from time import sleep
 
 
 
-webdriverPath = "/home/mr124/Documents/Projects/SocialMediaInvestigationFramework/geckodriver"
-profilePath =  "/home/mr124/Documents/Projects/SocialMediaInvestigationFramework/WhatsAppProfile"
+webdriverPath = "/home/mr124/Documents/Projects/SMIF/geckodriver"
+profilePath =  "/home/mr124/Documents/Projects/SMIF/WhatsAppProfile"
 
 logger = SharedMethods.logSetup.log("whatsApp","log.txt")
 
@@ -66,17 +66,16 @@ class WhatsApp(Person,XPath):
 
         
     def setupWhatsAppProfile(self):
-        driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath)
-        driver.get(self.Xpath.whatsAppUrl)
-        self.logger.info("Link Your Device")
-        SaveCookie = input("Done Linking Save the cookie?: Y/n ")
-        if SaveCookie.lower() == "y" or SaveCookie.lower == 'yes':
-            cookies = driver.get_cookies()
-            while not cookies:
-                input("retry Getting cookies: ?")
-                cookies = driver.get_cookies()
-            driver.quit()
-    
+        try:
+            driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath, self.profilePath)
+            driver.get(self.Xpath.whatsAppUrl)
+            self.logger.info("Link Your Device")
+            SaveCookie = input("Done Linking Save the cookie?: Y/n ")
+            if SaveCookie.lower() == "y" or SaveCookie.lower == 'yes':
+                driver.quit()
+        except:
+            self.logger.error('Error in setuping the whats profile')
+        
     def LoadCookies(self):
         # not ready yet
         driver = SharedMethods.BaseClass.CreatWebDriver(self.webdriverPath)
@@ -282,10 +281,13 @@ class WhatsApp(Person,XPath):
 if __name__ == "__main__":
     print("hello")
     x = WhatsApp(name="mano",phoneNumber="+20 10 1964 9231")
-    x.creatWebDriver()
-    x.OpenContactViaUrl()
-    x.getAlluserInfo()
+    x.setupWhatsAppProfile()
+    #x.creatWebDriver()
+    #x.OpenContactViaUrl()
+    #x.getAlluserInfo()
 #    x.downloadUesrImage()
     i = input("quite: ")
-    x.driver.quit()
+    if hasattr(x, 'driver') and callable(x.driver.quit):
+        x.driver.quit()
+
     
