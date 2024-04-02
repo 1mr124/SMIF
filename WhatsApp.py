@@ -23,17 +23,14 @@ class XPath():
         self.newChatXpath = '//*[@id="side"]/div[1]/div/div[2]/div[2]/div'
         self.searchXpath = '//*[@id="side"]/div[1]/div/div[2]/div[2]/div/div[1]/p'
         self.smallImageXpath = '/html/body/div[1]/div/div[2]/div[3]/div/div[2]/div[1]/div/div/div[3]/div/div/div/div[1]/div/div/div/img'
-        self.aboutXpath = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div/div/div[2]/div[2]/div[1]/span'
-        self.contactDivXpath = '/html/body/div[1]/div/div/div[5]/div/header/div[2]'
+        self.aboutXpath = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[2]/span/span'
+        self.BigImageXpath='/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[1]/div/img' 
+                        
+        self.contactDivXpath = '/html/body/div[1]/div/div/div[2]/div[4]/div/header'
         self.imageDivXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]'
         self.imageIfCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
         self.imageIfNoCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[1]/div/img'
-        # Selector Part
-        self.smallImgACP='#main > header > div._2pr2H > div > img' # ACP after chat is opened
-        self.contactDiv='#main > header > div._2au8k'
-        self.BigImage='#app > div > div.three._1jJ70 > div._2Ts6i._1xFRo > span > div > span > div > div > section > div.gsqs0kct.oauresqk.efgp0a3n.h3bz2vby.g0rxnol2.tvf2evcx.oq44ahr5.lb5m6g5c.brac1wpa.lkjmyc96.b8cdf3jl.bcymb0na.myel2vfb.e8k79tju > div.p357zi0d.ac2vgrno.pz0xruzv > div > img'
-        self.About='#app > div > div.three._1jJ70 > div._2Ts6i._1xFRo > span > div > span > div > div > section > div.gsqs0kct.oauresqk.efgp0a3n.h3bz2vby.g0rxnol2.tvf2evcx.oq44ahr5.lb5m6g5c.brac1wpa.lkjmyc96.i4pc7asj.bcymb0na.myel2vfb.e8k79tju > span > span'
-
+               
         self.whatsAppUrl = "https://web.whatsapp.com"
 
 
@@ -107,7 +104,7 @@ class WhatsApp(Person,XPath):
         except:
             self.logger.error("Couldn't create Driver")
             return False
-        
+    # stoped working coz of class name replace it with xpath    
     def checkIfWhatsAppLoaded(self):
         try:
             element = WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.CLASS_NAME, "_3WByx")))
@@ -119,6 +116,34 @@ class WhatsApp(Person,XPath):
             self.logger.error("Time out on loading whatsApp")
         except Exception as e:
             self.logger.error(f'error {e}')
+
+    
+    def checkIfElementIsLoaded(self, elementClass):
+        try:
+            element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME,elementClass )))
+            if element:
+                self.logger.info("element is loaded in the page")
+                sleep(3)
+                return True
+        except TimeoutException as e:
+            self.logger.error("Time out on loading whatsApp")
+        except Exception as e:
+            self.logger.error(f'error {e}')
+
+    def checkIfElementIsLoadedByXpath(self, elementXpath):
+        try:
+            element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, elementXpath)))
+            if element:
+                self.logger.info("element is loaded in the page")
+                sleep(3)
+                return True
+        except TimeoutException as e:
+            self.logger.error("Time out on loading whatsApp")
+        except Exception as e:
+            self.logger.error(f'error {e}')
+
+
+
 
 
     def findElementByXpath(self, xpath):
@@ -133,13 +158,23 @@ class WhatsApp(Person,XPath):
 
     def findElementByClass(self, ClassName):
         try:
-            element = driver.find_element(By.CLASS_NAME, ClassName)
+            element = self.driver.find_element(By.CLASS_NAME, ClassName)
             if element:
                 return element
             else:
                 return False
         except:
             self.logger.error("can't find element")
+
+    def findElementByCssSelector(self, cssSelector):
+        try:
+            element = self.driver.find_element_by_css_selector(cssSelector)
+            if element:
+                return element
+            else:
+                return False
+        except:
+            self.logger.error(f"couldn't find this element {cssSelector}")
     
     def sendKeys(self, word=None):
         actions = ActionChains(self.driver)
@@ -224,11 +259,10 @@ class WhatsApp(Person,XPath):
         
     def findImageLink(self):
         try:
-            imageElement = self.findElementByXpath(self.Xpath.imageDivXpath)
-            imgs = imageElement.find_elements(by='xpath', value='.//img')
-            if imgs:
-                imageUrl = self.getUrlFromimg(imgs[0])
-                self.imageUrl = imageUrl
+            imageElement = self.findElementByXpath(self.Xpath.BigImageXpath)
+            imgLink = imageElement.get_attribute("src")
+            if imgLink:
+                self.imageUrl = imgLink
                 self.logger.info("done finding the image url")
                 return True
             else:
@@ -239,12 +273,14 @@ class WhatsApp(Person,XPath):
 
     def getAlluserInfo(self):
         if self.Person.name and self.Person.phoneNumber:
-            x.checkIfWhatsAppLoaded()
-            x.getAbout()
-            x.getSmallImageUrl()
-            x.OpenContact()
-            x.OpenContactInfo()
-            x.findImageLink()
+            contactDiv = self.checkIfElementIsLoadedByXpath(self.Xpath.contactDivXpath)
+            if contactDiv:
+                self.OpenContactInfo()
+                self.getAbout()
+                #self.getSmallImageUrl()
+                self.findImageLink()
+            else:
+                self.logger.error('cant find contact div element')
         else:
             self.logger.error("can't find user name or phoneNumber")
 
