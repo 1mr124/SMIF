@@ -280,14 +280,3 @@ class WhatsApp(Person,XPath):
 
 if __name__ == "__main__":
     print("hello")
-    x = WhatsApp(name="mano",phoneNumber="+20 10 1964 9231")
-    x.setupWhatsAppProfile()
-    #x.creatWebDriver()
-    #x.OpenContactViaUrl()
-    #x.getAlluserInfo()
-#    x.downloadUesrImage()
-    i = input("quite: ")
-    if hasattr(x, 'driver') and callable(x.driver.quit):
-        x.driver.quit()
-
-    
