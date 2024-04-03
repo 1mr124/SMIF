@@ -30,7 +30,7 @@ class XPath():
         self.imageDivXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]'
         self.imageIfCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
         self.imageIfNoCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[1]/div/img'
-               
+        self.myImageXpath = '/html/body/div[1]/div/div/div[2]/div[3]/header/div[1]/div/img'
         self.whatsAppUrl = "https://web.whatsapp.com"
 
 
@@ -163,17 +163,32 @@ class WhatsApp(Person,XPath):
                 return False
         except:
             self.logger.error(f"couldn't find this element {cssSelector}")
+
+    def findElementByText(self, ElementText):
+        # Find element by partial text content using XPath
+        try:
+            element = self.driver.find_element(By.XPATH, f"//*[text()='{ElementText}']")
+            if element:
+                return element
+            else:
+                return False
+        except Exception as e:
+            self.logger.error(f'Error {e}')
     
     def sendKeys(self, word=None):
         actions = ActionChains(self.driver)
         actions.send_keys(word)
         actions.perform()
 
-    def OpenContactViaUrl(self):
+
+
+
+    def openContactViaUrl(self):
         try:
             print("hello")
             print(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
             self.driver.get(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
+            WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.XPATH, self.Xpath.smallImageXpath)))
             return True
         except:
             self.logger.error("can't find contact")
