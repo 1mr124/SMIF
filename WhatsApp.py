@@ -22,7 +22,7 @@ class XPath():
         # Xpath Part
         self.newChatXpath = '//*[@id="side"]/div[1]/div/div[2]/div[2]/div'
         self.searchXpath = '//*[@id="side"]/div[1]/div/div[2]/div[2]/div/div[1]/p'
-        self.smallImageXpath = '/html/body/div[1]/div/div[2]/div[3]/div/div[2]/div[1]/div/div/div[3]/div/div/div/div[1]/div/div/div/img'
+        self.smallImageXpath = '/html/body/div[1]/div/div/div[2]/div[4]/div/header/div[1]/div/img'
         self.aboutXpath = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[2]/span/span'
         self.BigImageXpath='/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[1]/div/img' 
                         
@@ -104,18 +104,6 @@ class WhatsApp(Person,XPath):
         except:
             self.logger.error("Couldn't create Driver")
             return False
-    # stoped working coz of class name replace it with xpath    
-    def checkIfWhatsAppLoaded(self):
-        try:
-            element = WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.CLASS_NAME, "_3WByx")))
-            if element:
-                self.logger.info("whatsApp page loaded")
-                sleep(3)
-                return True
-        except TimeoutException as e:
-            self.logger.error("Time out on loading whatsApp")
-        except Exception as e:
-            self.logger.error(f'error {e}')
 
     
     def checkIfElementIsLoaded(self, elementClass):
@@ -132,7 +120,7 @@ class WhatsApp(Person,XPath):
 
     def checkIfElementIsLoadedByXpath(self, elementXpath):
         try:
-            element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, elementXpath)))
+            element = WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.XPATH, elementXpath)))
             if element:
                 self.logger.info("element is loaded in the page")
                 sleep(3)
@@ -275,9 +263,9 @@ class WhatsApp(Person,XPath):
         if self.Person.name and self.Person.phoneNumber:
             contactDiv = self.checkIfElementIsLoadedByXpath(self.Xpath.contactDivXpath)
             if contactDiv:
+                self.getSmallImageUrl()
                 self.OpenContactInfo()
                 self.getAbout()
-                #self.getSmallImageUrl()
                 self.findImageLink()
             else:
                 self.logger.error('cant find contact div element')
