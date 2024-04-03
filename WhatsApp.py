@@ -25,6 +25,7 @@ class XPath():
         self.smallImageXpath = '/html/body/div[1]/div/div/div[2]/div[4]/div/header/div[1]/div/img'
         self.aboutXpath = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[2]/span/span'
         self.BigImageXpath='/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[1]/div/img' 
+        self.bussinessProfileXpath = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[2]/div/div/div[1]'
                         
         self.contactDivXpath = '/html/body/div[1]/div/div/div[2]/div[4]/div/header'
         self.imageDivXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]'
@@ -172,8 +173,9 @@ class WhatsApp(Person,XPath):
                 return element
             else:
                 return False
-        except Exception as e:
-            self.logger.error(f'Error {e}')
+        except:
+            self.logger.info(f"Text {ElementText} not found in the site")
+            return False
     
     def sendKeys(self, word=None):
         actions = ActionChains(self.driver)
@@ -208,7 +210,7 @@ class WhatsApp(Person,XPath):
             self.logger.error("can't find contact")
             return False
 
-    def OpenContact(self):
+    def openContact(self):
         try:
             smallImageElement = self.findElementByXpath(self.Xpath.smallImageXpath)
             smallImageElement.click()
@@ -218,7 +220,7 @@ class WhatsApp(Person,XPath):
             self.logger.error("error in opening the contact chat")
 
 
-    def OpenContactInfo(self):
+    def openContactInfo(self):
         try:
             contactDiv = self.findElementByXpath(self.Xpath.contactDivXpath)
             contactDiv.click()
@@ -233,6 +235,27 @@ class WhatsApp(Person,XPath):
                 return element.get_attribute('src')
         except:
             self.logger.error("can't find url from the element")
+            return False
+        
+    def checkIfBussinessProfile(self):
+        try:
+            element = self.findElementByXpath(self.Xpath.bussinessProfileXpath)
+            if element.text == 'This is a business account.':
+                return True
+            else:
+                return False
+        except:
+            self.logger.error("Error in trying to know if what's app bussiness profile")
+
+    def checkIfBussinessProfileUsingSearch(self):
+        try:
+            element = self.findElementByText('This is a business account.')
+            if element.text == 'This is a business account.':
+                return True
+            else:
+                return False
+        except:
+            self.logger.info("Not a bussniss Profile")
             return False
         
 
@@ -279,7 +302,7 @@ class WhatsApp(Person,XPath):
             contactDiv = self.checkIfElementIsLoadedByXpath(self.Xpath.contactDivXpath)
             if contactDiv:
                 self.getSmallImageUrl()
-                self.OpenContactInfo()
+                self.openContactInfo()
                 self.getAbout()
                 self.findImageLink()
             else:
