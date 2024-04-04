@@ -25,8 +25,16 @@ class XPath():
         self.smallImageXpath = '/html/body/div[1]/div/div/div[2]/div[4]/div/header/div[1]/div/img'
         self.aboutXpath = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[2]/span/span'
         self.BigImageXpath='/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[1]/div/img' 
+        
         self.bussinessProfileXpath = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[2]/div/div/div[1]'
-                        
+        self.bussinessBigImage = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
+        self.bussinessCoverDiv = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[1]/div'
+        self.bussinessAboutDiv = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[3]'
+                                    
+        self.bussinessName = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[3]/div[1]/div[2]/span'
+                                
+
+
         self.contactDivXpath = '/html/body/div[1]/div/div/div[2]/div[4]/div/header'
         self.imageDivXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]'
         self.imageIfCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
@@ -42,6 +50,7 @@ class WhatsApp(Person,XPath):
         self.profilePath = profilePath
         self.Xpath = XPath()
         self.Person = Person(name=name,phoneNumber=phoneNumber)
+        self.bussinessAcc = False # defualt value for normal ppl
 
     def saveCookie(self, cookieFileName ,cookies):
         if cookies:
@@ -230,7 +239,7 @@ class WhatsApp(Person,XPath):
         except:
             self.logger.error("can't open the contact Info")
     
-    def getUrlFromimg(self, element):
+    def getUrlFromImg(self, element):
         try:
             if element.tag_name == 'img':
                 return element.get_attribute('src')
@@ -264,7 +273,7 @@ class WhatsApp(Person,XPath):
         # set the value of the small image url MUSTH RUN AFTER OPEN CONTACT
         try:
             smallImageElement = self.findElementByXpath(self.Xpath.smallImageXpath)
-            smallImageUrl = self.getUrlFromimg(element=smallImageElement)
+            smallImageUrl = self.getUrlFromImg(element=smallImageElement)
             self.smallImageUrl = smallImageUrl
             self.logger.info("Done finding small image url")
             return True
@@ -284,19 +293,57 @@ class WhatsApp(Person,XPath):
         except:
             self.logger.error("can't get about ")
         
+
     def findImageLink(self):
         try:
             imageElement = self.findElementByXpath(self.Xpath.BigImageXpath)
-            imgLink = imageElement.get_attribute("src")
-            if imgLink:
-                self.imageUrl = imgLink
-                self.logger.info("done finding the image url")
-                return True
-            else:
-                self.logger.error("can't find img url")
+            BigImageUrl =  self.getUrlFromImg(imageElement)
+            self.bigImageUrl = BigImageUrl
         except:
             self.logger.error("can't find the big image url")
             return False
+        
+    def findBussinessBigImageLink(self):
+        if self.bussinessAcc:
+            try:
+                imageElement = self.findElementByXpath(self.Xpath.bussinessBigImage)
+                BigImageUrl =  self.getUrlFromImg(imageElement)
+                self.bigImageUrl = BigImageUrl
+            except:
+                self.logger.error('error in getting the Image link')
+                return False
+            
+
+    def findBussinessCoverUrl(self):
+        if self.bussinessAcc:
+            try:
+                coverElement = self.findElementByXpath(self.Xpath.bussinessCoverDiv)
+                if coverElement:
+                    style = coverElement.get_attribute('style')
+                    url_start_index = style.find('url("') + len('url("')
+                    url_end_index = style.find('")', url_start_index)
+                    url = style[url_start_index:url_end_index]
+                    return url
+            except:
+                self.logger.error('error in getting the cover link')
+                return False
+
+    
+    def findBussinessAbout(self):
+        if self.bussinessAcc:
+            try:
+                aboutDivElement = self.findElementByXpath(self.Xpath.bussinessAboutDiv)
+                if aboutDivElement:
+                    aboutText = aboutDivElement.text
+                    self.about = aboutText
+                    self.logger.info("done finding about info")
+            except:
+                self.logger.error("error in geting about")
+
+
+    def findBussinessName(self):
+        pass
+    
 
     def getAlluserInfo(self):
         if self.Person.name and self.Person.phoneNumber:
