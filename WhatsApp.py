@@ -191,6 +191,7 @@ class WhatsApp(Person,XPath):
             print(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
             self.driver.get(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
             WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.XPATH, self.Xpath.smallImageXpath)))
+            sleep(3)
             return True
         except:
             self.logger.error("can't find contact")
