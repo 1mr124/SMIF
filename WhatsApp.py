@@ -51,6 +51,8 @@ class WhatsApp(Person,XPath):
         self.Xpath = XPath()
         self.Person = Person(name=name,phoneNumber=phoneNumber)
         self.bussinessAcc = False # defualt value for normal ppl
+        self.data = {'about':'','bigImageUrl':'','smallImageUrl':'','bussnissCover':'',}
+
 
     def saveCookie(self, cookieFileName ,cookies):
         if cookies:
@@ -199,7 +201,7 @@ class WhatsApp(Person,XPath):
             print("hello")
             print(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
             self.driver.get(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
-            WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.XPATH, self.Xpath.smallImageXpath)))
+            WebDriverWait(self.driver, 240).until(EC.presence_of_element_located((By.XPATH, self.Xpath.smallImageXpath)))
             sleep(3)
             return True
         except:
@@ -224,6 +226,7 @@ class WhatsApp(Person,XPath):
         try:
             smallImageElement = self.findElementByXpath(self.Xpath.smallImageXpath)
             smallImageElement.click()
+            sleep(2)
             self.logger.info("Done opening the contact chat")
             return True
         except:
@@ -251,6 +254,7 @@ class WhatsApp(Person,XPath):
         try:
             element = self.findElementByXpath(self.Xpath.bussinessProfileXpath)
             if element.text == 'This is a business account.':
+                self.bussinessAcc = True
                 return True
             else:
                 return False
@@ -261,6 +265,7 @@ class WhatsApp(Person,XPath):
         try:
             element = self.findElementByText('This is a business account.')
             if element.text == 'This is a business account.':
+                self.bussinessAcc = True
                 return True
             else:
                 return False
@@ -269,23 +274,23 @@ class WhatsApp(Person,XPath):
             return False
         
 
-    def getSmallImageUrl(self):
+    def findSmallImageUrl(self):
         # set the value of the small image url MUSTH RUN AFTER OPEN CONTACT
         try:
             smallImageElement = self.findElementByXpath(self.Xpath.smallImageXpath)
             smallImageUrl = self.getUrlFromImg(element=smallImageElement)
-            self.smallImageUrl = smallImageUrl
+            self.data['smallImageUrl'] = smallImageUrl
             self.logger.info("Done finding small image url")
             return True
         except:
             self.logger.error("can't find the small image")
             return False
     
-    def getAbout(self):
+    def findAbout(self):
         try:
             aboutElemnet = self.findElementByXpath(self.Xpath.aboutXpath)
             if aboutElemnet:
-                self.about = aboutElemnet.text
+                self.data['about'] = aboutElemnet.text
                 self.logger.info("done finding about")
                 return True
             else:
@@ -298,7 +303,7 @@ class WhatsApp(Person,XPath):
         try:
             imageElement = self.findElementByXpath(self.Xpath.BigImageXpath)
             BigImageUrl =  self.getUrlFromImg(imageElement)
-            self.bigImageUrl = BigImageUrl
+            self.data['bigImageUrl'] = BigImageUrl
         except:
             self.logger.error("can't find the big image url")
             return False
@@ -308,7 +313,7 @@ class WhatsApp(Person,XPath):
             try:
                 imageElement = self.findElementByXpath(self.Xpath.bussinessBigImage)
                 BigImageUrl =  self.getUrlFromImg(imageElement)
-                self.bigImageUrl = BigImageUrl
+                self.data['bigImageUrl'] = BigImageUrl
             except:
                 self.logger.error('error in getting the Image link')
                 return False
@@ -323,7 +328,8 @@ class WhatsApp(Person,XPath):
                     url_start_index = style.find('url("') + len('url("')
                     url_end_index = style.find('")', url_start_index)
                     url = style[url_start_index:url_end_index]
-                    return url
+                    self.data['bussnissCover'] =  url
+                    self.logger.info('Done finding the bussiness cover ')
             except:
                 self.logger.error('error in getting the cover link')
                 return False
@@ -335,7 +341,7 @@ class WhatsApp(Person,XPath):
                 aboutDivElement = self.findElementByXpath(self.Xpath.bussinessAboutDiv)
                 if aboutDivElement:
                     aboutText = aboutDivElement.text
-                    self.about = aboutText
+                    self.data['about'] = aboutText
                     self.logger.info("done finding about info")
             except:
                 self.logger.error("error in geting about")
@@ -349,9 +355,9 @@ class WhatsApp(Person,XPath):
         if self.Person.name and self.Person.phoneNumber:
             contactDiv = self.checkIfElementIsLoadedByXpath(self.Xpath.contactDivXpath)
             if contactDiv:
-                self.getSmallImageUrl()
+                self.findSmallImageUrl()
                 self.openContactInfo()
-                self.getAbout()
+                self.findAbout()
                 self.findImageLink()
             else:
                 self.logger.error('cant find contact div element')
