@@ -348,17 +348,41 @@ class WhatsApp(Person,XPath):
 
 
     def findBussinessName(self):
-        pass
-    
+        if self.bussinessAcc:
+            try:
+                NameElement = self.findElementByXpath(self.Xpath.bussinessName)
+                if NameElement:
+                    bussinessName = NameElement.text
+                    self.data['bussinessName'] = bussinessName
+                    self.logger.info("done finding bussinessName info")
+            except:
+                self.logger.error("error in geting bussinessName")
+
+
+    def collectUserInfo(self):
+        try:
+            if self.bussinessAcc:
+                self.findSmallImageUrl()
+                self.findBussinessAbout()
+                self.findBussinessBigImageLink()
+                self.findBussinessCoverUrl()
+                self.findBussinessName()
+                self.logger.info("Done Collecting all the bussniss user data")
+            else:
+                self.findAbout()
+                self.findImageLink()
+                self.findSmallImageUrl()
+                self.logger.info("Done collecting all the user data")
+        except:
+            self.logger.error("error while collecting all user data ")
 
     def getAlluserInfo(self):
         if self.Person.name and self.Person.phoneNumber:
             contactDiv = self.checkIfElementIsLoadedByXpath(self.Xpath.contactDivXpath)
             if contactDiv:
-                self.findSmallImageUrl()
-                self.openContactInfo()
-                self.findAbout()
-                self.findImageLink()
+                self.openContact()
+                self.checkIfBussinessProfile()
+                self.collectUserInfo()
             else:
                 self.logger.error('cant find contact div element')
         else:
