@@ -27,6 +27,14 @@ class BaseClass:
             logger.error("File does not exist")
 
     @staticmethod
+    def makeDir(Path):
+        if os.path.isdir(Path):
+            return True
+        else:
+            os.makedirs(Path, exist_ok=True)
+            return True
+
+    @staticmethod
     def checkIfFileExist(Path):
         if Path:
             return os.path.isfile(Path)
