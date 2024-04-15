@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep
+from datetime import datetime 
 
 
 
@@ -36,9 +37,6 @@ class XPath():
 
 
         self.contactDivXpath = '/html/body/div[1]/div/div/div[2]/div[4]/div/header'
-        self.imageDivXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]'
-        self.imageIfCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
-        self.imageIfNoCoverXpath = '/html/body/div[1]/div/div/div[6]/span/div/span/div/div/section/div[1]/div[1]/div/img'
         self.myImageXpath = '/html/body/div[1]/div/div/div[2]/div[3]/header/div[1]/div/img'
         self.whatsAppUrl = "https://web.whatsapp.com"
 
@@ -51,6 +49,7 @@ class WhatsApp(Person,XPath):
         self.Xpath = XPath()
         self.Person = Person(name=name,phoneNumber=phoneNumber)
         self.bussinessAcc = False # defualt value for normal ppl
+        self.lastProfilePic = "Files/mano/whatApp/mano-2024-04-13-17:59:11.895772"
         self.data = {'about':'','bigImageUrl':'','smallImageUrl':'','bussnissCover':'',}
 
 
@@ -201,7 +200,7 @@ class WhatsApp(Person,XPath):
             print("hello")
             print(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
             self.driver.get(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
-            WebDriverWait(self.driver, 240).until(EC.presence_of_element_located((By.XPATH, self.Xpath.smallImageXpath)))
+            WebDriverWait(self.driver, 240).until(EC.presence_of_element_located((By.XPATH, self.Xpath.contactDivXpath)))
             sleep(3)
             return True
         except:
@@ -388,33 +387,72 @@ class WhatsApp(Person,XPath):
         else:
             self.logger.error("can't find user name or phoneNumber")
 
-    def downloadUesrImage(self):
+    def downloaImage(self,imgUrl):
         try:
-            if self.imageUrl and self.Person.name :
-                BigImage = SharedMethods.Image(ImageURL=self.imageUrl, ImageName=f'big{self.Person.name}')
-                BigImage.DownloadImage()
+            if imgUrl and self.Person.name and SharedMethods.BaseClass.checkIfDir(f"Files/{self.Person.name}"): # ensure that the person has dir profile
+                ImgName = f'Files/{self.Person.name}/whatsApp/{self.Person.name}-{f"{datetime.now()}".replace(" ","-")}'
+                Img = SharedMethods.Image(imageUrl=imgUrl, imageName=ImgName)
+                if Img.DownloadImage():
+                    Img.GenerateImageHash()
+                    return Img
+                else:
+                    self.logger.error("Error while downloading the Image")
+                    return False
+            else:
+                self.logger.error("couldn't downlaod the img probably the user foldar not found")
+                return False
         except Exception as e:
-            self.logger.error(f'Error {e}')
+            self.logger.error('Error While downloading Image ')
+            return False
 
-    def checkIfUserChangedPic(self):
-        pass
+    def compareImages(self):
+        newSmallImg = self.downloaImage(self.data['smallImageUrl'])
+        try:
+            # fun to cmp the old with new
+            if newSmallImg:
+                oldImage = SharedMethods.Image(imageName="LastProfilePic", imagePath=self.lastProfilePic)
+                if SharedMethods.Image.isTheSameImage(oldImage,newSmallImg):
+                    return False
+                else:
+                    return True
+            else:
+                return "Faild"
+        except:
+            return "Faild"
+        
+    def checkIfUserChagedProfilePic(self): # return True if user changed False if the same pic , Faild if theri is an error
+        try:
+            if self.data['smallImageUrl'] == '':
+                self.logger.info("the user doesn't has the small image link getting it ..... ")
+                self.findSmallImageUrl()
+
+            if self.data['smallImageUrl']:
+                return self.compareImages()
+            elif self.data['smallImageUrl'] == False:
+                # compare it with the last state to see if this is the defalut state
+                self.logger.info("The user has some Depression stuff")
+                self.data['removedPic'] = True
+                if self.lastProfilePic == False:
+                    return False
+                else:
+                    return True
+        except:
+            self.logger.error("Error while checking if the user has changed his pic")
+            return "Faild"
 
     def createUserFoldar(self):
-        pass # username foldar then whats twiiter etc - whatss > images: about:
-            
-    def sendMessage(self):
-        pass
+        try:
+            SharedMethods.BaseClass.makeDir(f"Files/{self.Person.name}/whatsApp")
+            self.logger.info("Done making user whats foldar")
+            return True
+        except:
+            self.logger.error("couldn't make user foldar")
+            return False
 
-    def GetUserProfilePicLink(self):
-        pass
+            
 
     def DownloadUserProfilePic(self):
         pass
-
-    def CheckIfUserChagedProfilePic(self):
-        pass
-
-
 
 
 

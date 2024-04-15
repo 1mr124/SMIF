@@ -5,10 +5,10 @@ from BaseClass import *
 logger = logSetup.log("SharedMethods","log.txt")
 
 class Image():
-    def __init__(self, imagePath=None, imageURL=None, imageHash=None, imageName=None, listOfUrls=None):
+    def __init__(self, imagePath=None, imageUrl=None, imageHash=None, imageName=None, listOfUrls=None):
         self.logger = logger
         self.Path = imagePath
-        self.URL = imageURL
+        self.URL = imageUrl
         self.Hash = imageHash
         self.FileName = imageName
         self.UrlList = listOfUrls
