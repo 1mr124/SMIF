@@ -5,13 +5,13 @@ from BaseClass import *
 logger = logSetup.log("SharedMethods","log.txt")
 
 class Image():
-    def __init__(self, ImagePath=None, ImageURL=None, ImageHash=None, ImageName=None, ListOfUrls=None):
+    def __init__(self, imagePath=None, imageURL=None, imageHash=None, imageName=None, listOfUrls=None):
         self.logger = logger
-        self.Path = ImagePath
-        self.URL = ImageURL
-        self.Hash = ImageHash
-        self.FileName = ImageName
-        self.UrlList = ListOfUrls
+        self.Path = imagePath
+        self.URL = imageURL
+        self.Hash = imageHash
+        self.FileName = imageName
+        self.UrlList = listOfUrls
 
     def DownloadImage(self):
         self.logger.info(f"starting downloading {self.URL}")
