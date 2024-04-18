@@ -26,7 +26,8 @@ class XPath():
         self.smallImageXpath = '/html/body/div[1]/div/div/div[2]/div[4]/div/header/div[1]/div/img'
         self.aboutXpath = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[2]/span/span'
         self.BigImageXpath='/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[1]/div/img' 
-        
+        self.onlineDivXpath='/html/body/div[1]/div/div/div[2]/div[4]/div/header/div[2]'
+
         self.bussinessProfileXpath = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[2]/div/div/div[1]'
         self.bussinessBigImage = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
         self.bussinessCoverDiv = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[1]/div'
@@ -449,7 +450,23 @@ class WhatsApp(Person,XPath):
             self.logger.error("couldn't make user foldar")
             return False
 
-            
+    def isActiveNow(self):
+        try:
+            body = self.driver.find_element("css selector", "body")
+            onlineElement = self.findElementByXpath(self.Xpath.onlineDivXpath)
+            ActionChains(self.driver).move_to_element(body).perform()
+            ActionChains(self.driver).move_to_element(onlineElement).perform()
+            if 'online' in onlineElement.text.lower():
+                return True
+            else:
+                return False
+        except:
+            self.logger.error("error in monitor active now")
+            return "False"
+
+    def monitorOnline(self):
+        onlineDiv = self.findElementByXpath(self.Xpath.onlineDivXpath)
+        pass
 
     def DownloadUserProfilePic(self):
         pass
