@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
-from time import sleep
+import time
 from datetime import datetime 
 
 
@@ -123,7 +123,7 @@ class WhatsApp(Person,XPath):
             element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME,elementClass )))
             if element:
                 self.logger.info("element is loaded in the page")
-                sleep(3)
+                time.sleep(3)
                 return True
         except TimeoutException as e:
             self.logger.error("Time out on loading whatsApp")
@@ -135,7 +135,7 @@ class WhatsApp(Person,XPath):
             element = WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.XPATH, elementXpath)))
             if element:
                 self.logger.info("element is loaded in the page")
-                sleep(3)
+                time.sleep(3)
                 return True
         except TimeoutException as e:
             self.logger.error("Time out on loading whatsApp")
@@ -202,7 +202,7 @@ class WhatsApp(Person,XPath):
             print(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
             self.driver.get(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
             WebDriverWait(self.driver, 240).until(EC.presence_of_element_located((By.XPATH, self.Xpath.contactDivXpath)))
-            sleep(3)
+            time.sleep(3)
             return True
         except:
             self.logger.error("can't find contact")
@@ -216,7 +216,7 @@ class WhatsApp(Person,XPath):
             searchElement.click()
             self.sendKeys(word=self.Person.phoneNumber)
             self.logger.info("done searching for contact ")
-            sleep(3)
+            time.sleep(3)
             return True
         except:
             self.logger.error("can't find contact")
@@ -226,7 +226,7 @@ class WhatsApp(Person,XPath):
         try:
             smallImageElement = self.findElementByXpath(self.Xpath.smallImageXpath)
             smallImageElement.click()
-            sleep(2)
+            time.sleep(2)
             self.logger.info("Done opening the contact chat")
             return True
         except:
@@ -464,8 +464,21 @@ class WhatsApp(Person,XPath):
             self.logger.error("error in monitor active now")
             return "False"
 
-    def monitorOnline(self):
-        onlineDiv = self.findElementByXpath(self.Xpath.onlineDivXpath)
+    def monitorOnline(self, durationToRun, frequency):
+        try:
+            if isinstance(durationToRun, int) and isinstance(frequency, int):
+                startTime = time.time()
+                while time.time() - startTime < durationToRun:
+                    print("checking now")
+                    active = self.isActiveNow()
+                    self.storeActiveStatus(active)
+                    time.sleep(frequency)
+            else:
+                self.logger.error("wtf the duration and freq is not int")
+        except:
+            self.logger.error("error in monitoring online status")
+
+    def storeActiveStatus(self):
         pass
 
     def DownloadUserProfilePic(self):
