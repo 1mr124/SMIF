@@ -2,6 +2,8 @@
 
 import SharedMethods
 from Person import *
+from models import *
+
 import json
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -484,6 +486,12 @@ class WhatsApp(Person,XPath):
     def DownloadUserProfilePic(self):
         pass
 
+    # database section
+    def addUserToDataBase(self):
+        pass
+
+    def storeAlluserInfo(self):
+        pass
 
 
 if __name__ == "__main__":
