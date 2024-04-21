@@ -370,13 +370,16 @@ class WhatsApp(Person,XPath):
                 self.findBussinessCoverUrl()
                 self.findBussinessName()
                 self.logger.info("Done Collecting all the bussniss user data")
+                return True
             else:
                 self.findAbout()
                 self.findImageLink()
                 self.findSmallImageUrl()
                 self.logger.info("Done collecting all the user data")
+                return True
         except:
             self.logger.error("error while collecting all user data ")
+            return False
 
     def getAlluserInfo(self):
         if self.Person.name and self.Person.phoneNumber:
@@ -384,12 +387,15 @@ class WhatsApp(Person,XPath):
             if contactDiv:
                 self.openContact()
                 self.checkIfBussinessProfile()
-                self.collectUserInfo()
+                result = self.collectUserInfo()
+                return True if result else False
             else:
                 self.logger.error('cant find contact div element')
+                return False
         else:
             self.logger.error("can't find user name or phoneNumber")
-
+            return False
+        
     def downloaImage(self,imgUrl):
         try:
             if imgUrl and self.Person.name and SharedMethods.BaseClass.checkIfDir(f"Files/{self.Person.name}"): # ensure that the person has dir profile
@@ -487,9 +493,6 @@ class WhatsApp(Person,XPath):
         pass
 
     # database section
-    def addUserToDataBase(self):
-        pass
-
     def storeAlluserInfo(self):
         pass
 
