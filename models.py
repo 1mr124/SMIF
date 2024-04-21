@@ -1,4 +1,4 @@
-from sqlalchemy import (create_engine, Column, Integer, String, Date, ForeignKey, DateTime, MetaData )
+from sqlalchemy import (create_engine, Column, Integer, String, Date, ForeignKey, DateTime, MetaData, Boolean)
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -19,7 +19,7 @@ Base = declarative_base()
 
 class Persondb(Base):
     __tablename__ = 'person'
-    id = Column(Integer, primary_key=True)
+    userId = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     phoneNumber = Column(String(15), nullable=False, unique=True, index=True )
     birthday = Column(String(10))
@@ -68,11 +68,12 @@ class Persondb(Base):
 
 class whatsAppdb(Base):
     __tablename__ = 'whatsApp'
-    id = Column(Integer, primary_key=True)
+    whatsappUserId = Column(Integer, primary_key=True)
     currentProfilePic = Column(String(100))
     currentAboutStatus = Column(String(140))
-    currentbussinessCover = Column(String(100))
-    currentbussinessName = Column(String(50))
+    
+    currentbussinessCover = Column(String(100), nullable=True, default=None) 
+    currentbussinessName = Column(String(50), nullable=True, default=None)
 
     lastOnline = Column(DateTime, nullable=True)
 
@@ -80,23 +81,71 @@ class whatsAppdb(Base):
     phoneNumber = Column(String(17), nullable=False)
 
     # Define the foreign key relationship
-    personId = Column(Integer, ForeignKey('person.id'))
+    personId = Column(Integer, ForeignKey('person.userId'))
     person = relationship('Persondb', back_populates='whatsappEntries')
     # One-to-Many relationship with ProfilePic
     profilePics = relationship('ProfilePic', back_populates='whatsapp', cascade='all, delete-orphan')
 
+    aboutLog = relationship('aboutLog', back_populates='whatsAppUser')
+    profilePicLog = relationship('profilePicsLog', back_populates='whatsAppUser')
+    aboutLog = relationship('onlineLog', back_populates='whatsAppUser')
+    bDataLog = relationship('bussnissDataLog', back_populates='whatsAppUser')
+
+
+
+class onlineLog(Base):
+    __tablename__ = 'onlineLog'
+    logId = Column(Integer, primary_key=True)
+    timeStamp = Column(DateTime, default=datetime.now)
+    status = Column(Boolean)
+
+    whatsappUserId = relationship('whatsAppdb', ForeignKey('whatsApp.whatsappUserId'))
+    whatsAppUser = relationship('whatsAppdb', back_populates='aboutLog')
+
+
+
+
+class aboutLog(Base):
+    __tablename__ = 'aboutLog'
+    userId = Column(Integer, primary_key=True)
+    dateChanged = Column(DateTime , default = datetime.now())
+    about = Column(String(140))
+
+    whatsappUserId = relationship('whatsAppdb', ForeignKey('whatsApp.whatsappUserId'))
+    whatsAppUser = relationship('whatsAppdb', back_populates='aboutLog')
+
+
+
+class profilePicsLog(Base):
+    __tablename__ = 'profilePicsLog'
+    picId = Column(Integer, primary_key=True)
+    dateChanged = Column(DateTime , default = datetime.now())
+    picPath = Column(String(100))
+
+    whatsappUserId = relationship('whatsAppdb', ForeignKey('whatsApp.whatsappUserId'))
+    whatsAppUser = relationship('whatsAppdb', back_populates='profilePicLog')
+
+
+class bussnissDataLog(Base):
+    __tablename__ = 'bussnissDataLog'
+    bDataId = Column(Integer, primary_key=True)
+    dateChanged = Column(DateTime , default = datetime.now())
+    bName = Column(String(50))
+    bCoverPath = Column(String(100))
+    whatsappUserId = relationship('whatsAppdb', ForeignKey('whatsApp.whatsappUserId'))
+    whatsAppUser = relationship('whatsAppdb', back_populates='bDataLog')
 
 
 class Twitterdb(Base):
     __tablename__ = 'Twitter'
-    id = Column(Integer, primary_key=True)
+    userId = Column(Integer, primary_key=True)
     currentProfilePic = Column(String(100))
     currentBio = Column(String(200))
     userName = Column(String(15), nullable=False)
     profilePics = relationship('ProfilePic', back_populates='twitter', cascade='all, delete-orphan')
 
     # Define the foreign key relationship
-    personId = Column(Integer, ForeignKey('person.id'))
+    personId = Column(Integer, ForeignKey('person.userId'))
     person = relationship('Persondb', back_populates='TwitterEntries')
 
 
@@ -105,16 +154,16 @@ class Twitterdb(Base):
 
 class ProfilePic(Base):
     __tablename__ = 'ProfilePic'
-    id = Column(Integer, primary_key=True)
+    userId = Column(Integer, primary_key=True)
     path = Column(String(100))
     #entity_type = Column(String(50))  # Type of the associated entity (e.g., WhatsApp, Twitter, Facebook)
-    #entity_id = Column(Integer)        # ID of the associated entity
+    #entity_userId = Column(Integer)        # ID of the associated entity
     createdAt = Column(DateTime, default=datetime.now)
     hash = Column(String(32))
     
-    whatsappId = Column(Integer, ForeignKey('whatsApp.id'))
+    whatsappId = Column(Integer, ForeignKey('whatsApp.whatsappUserId'))
     whatsapp = relationship('whatsAppdb', back_populates='profilePics')
     
-    TwitterId = Column(Integer, ForeignKey('Twitter.id'))
+    TwitterId = Column(Integer, ForeignKey('Twitter.userId'))
     twitter = relationship('Twitterdb', back_populates='profilePics')
     
