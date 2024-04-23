@@ -88,7 +88,7 @@ class whatsAppdb(Base):
 
     aboutLog = relationship('aboutLog', back_populates='whatsAppUser')
     profilePicLog = relationship('profilePicsLog', back_populates='whatsAppUser')
-    aboutLog = relationship('onlineLog', back_populates='whatsAppUser')
+    onlineLog = relationship('onlineLog', back_populates='whatsAppUser')
     bDataLog = relationship('bussnissDataLog', back_populates='whatsAppUser')
 
 
@@ -99,8 +99,8 @@ class onlineLog(Base):
     timeStamp = Column(DateTime, default=datetime.now)
     status = Column(Boolean)
 
-    whatsappUserId = relationship('whatsAppdb', ForeignKey('whatsApp.whatsappUserId'))
-    whatsAppUser = relationship('whatsAppdb', back_populates='aboutLog')
+    whatsappUserId = Column(Integer, ForeignKey('whatsApp.whatsappUserId'))
+    whatsAppUser = relationship('whatsAppdb', back_populates='onlineLog')
 
 
 
@@ -111,7 +111,7 @@ class aboutLog(Base):
     dateChanged = Column(DateTime , default = datetime.now())
     about = Column(String(140))
 
-    whatsappUserId = relationship('whatsAppdb', ForeignKey('whatsApp.whatsappUserId'))
+    whatsappUserId = Column(Integer, ForeignKey('whatsApp.whatsappUserId'))
     whatsAppUser = relationship('whatsAppdb', back_populates='aboutLog')
 
 
@@ -122,7 +122,7 @@ class profilePicsLog(Base):
     dateChanged = Column(DateTime , default = datetime.now())
     picPath = Column(String(100))
 
-    whatsappUserId = relationship('whatsAppdb', ForeignKey('whatsApp.whatsappUserId'))
+    whatsappUserId = Column(Integer, ForeignKey('whatsApp.whatsappUserId'))
     whatsAppUser = relationship('whatsAppdb', back_populates='profilePicLog')
 
 
@@ -132,7 +132,8 @@ class bussnissDataLog(Base):
     dateChanged = Column(DateTime , default = datetime.now())
     bName = Column(String(50))
     bCoverPath = Column(String(100))
-    whatsappUserId = relationship('whatsAppdb', ForeignKey('whatsApp.whatsappUserId'))
+
+    whatsappUserId = Column(Integer, ForeignKey('whatsApp.whatsappUserId'))
     whatsAppUser = relationship('whatsAppdb', back_populates='bDataLog')
 
 
