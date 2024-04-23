@@ -7,7 +7,7 @@ from datetime import datetime
 
 def createSession():
     try:
-        engine = create_engine('sqlite:///E.db')
+        engine = create_engine('sqlite:///SMIF.db')
         Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
         session = Session()

@@ -54,6 +54,7 @@ class WhatsApp(Person,XPath):
         self.bussinessAcc = False # defualt value for normal ppl
         self.lastProfilePic = "Files/mano/whatApp/mano-2024-04-13-17:59:11.895772"
         self.data = {'about':'','bigImageUrl':'','smallImageUrl':'','bussnissCover':'',}
+        self.persondb = self.loadDatabaseData()
 
 
     def saveCookie(self, cookieFileName ,cookies):
@@ -493,7 +494,22 @@ class WhatsApp(Person,XPath):
         pass
 
     # database section
-    def storeAlluserInfo(self):
+    def loadDatabaseData(self):
+        try:
+            if SharedMethods.BaseClass.checkIfFileExist("SMIF.db"):
+                session = createSession()
+                if session:
+                    userdata = session.query(Persondb).filter_by(phoneNumber=self.Person.phoneNumber).first()
+                    self.logger.info("done loading the user data from the database")
+                    return userdata
+                else:
+                    return False
+            else:
+                return False
+        except:
+            self.logger.error("error in loading person db")
+
+    def storeUserAbout(self, session, person, about):
         pass
 
 
