@@ -54,6 +54,7 @@ class WhatsApp(Person,XPath):
         self.bussinessAcc = False # defualt value for normal ppl
         self.lastProfilePic = "Files/mano/whatApp/mano-2024-04-13-17:59:11.895772"
         self.data = {'about':'','bigImageUrl':'','smallImageUrl':'','bussnissCover':'',}
+        self.session = self.createClassSession()
         self.persondb = self.loadDatabaseData()
 
 
@@ -494,24 +495,24 @@ class WhatsApp(Person,XPath):
         pass
 
     # database section
+    def createClassSession(self):
+        # Check if the database file exists
+        if not SharedMethods.BaseClass.checkIfFileExist("SMIF.db"):
+            self.logger.error("Database file not found")
+            return False    
+        # Create a session to interact with the database
+        return createSession()
+    
     def loadDatabaseData(self):
         try:
-            # Check if the database file exists
-            if not SharedMethods.BaseClass.checkIfFileExist("SMIF.db"):
-                self.logger.error("Database file not found")
+            if self.session:
+                # Query the database for user data based on phone number
+                userdata = self.session.query(Persondb).filter_by(phoneNumber=self.Person.phoneNumber).first()
+                self.logger.info("User data loaded from the database")
+                return userdata
+            else:
+                self.logger.error("Failed to find session")
                 return False
-            
-            # Create a session to interact with the database
-            with createSession() as session:
-                # Check if session is successfully created
-                if session:
-                    # Query the database for user data based on phone number
-                    userdata = session.query(Persondb).filter_by(phoneNumber=self.Person.phoneNumber).first()
-                    self.logger.info("User data loaded from the database")
-                    return userdata
-                else:
-                    self.logger.error("Failed to create session")
-                    return False
         except Exception as e:
             self.logger.error(f"Error loading user data from database: {str(e)}")
             return False
