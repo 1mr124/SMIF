@@ -496,18 +496,25 @@ class WhatsApp(Person,XPath):
     # database section
     def loadDatabaseData(self):
         try:
-            if SharedMethods.BaseClass.checkIfFileExist("SMIF.db"):
-                session = createSession()
+            # Check if the database file exists
+            if not SharedMethods.BaseClass.checkIfFileExist("SMIF.db"):
+                self.logger.error("Database file not found")
+                return False
+            
+            # Create a session to interact with the database
+            with createSession() as session:
+                # Check if session is successfully created
                 if session:
+                    # Query the database for user data based on phone number
                     userdata = session.query(Persondb).filter_by(phoneNumber=self.Person.phoneNumber).first()
-                    self.logger.info("done loading the user data from the database")
+                    self.logger.info("User data loaded from the database")
                     return userdata
                 else:
+                    self.logger.error("Failed to create session")
                     return False
-            else:
-                return False
-        except:
-            self.logger.error("error in loading person db")
+        except Exception as e:
+            self.logger.error(f"Error loading user data from database: {str(e)}")
+            return False
 
     def storeUserAbout(self, session, person, about):
         pass
