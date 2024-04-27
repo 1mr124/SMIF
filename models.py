@@ -20,8 +20,8 @@ Base = declarative_base()
 class Persondb(Base):
     __tablename__ = 'person'
     userId = Column(Integer, primary_key=True)
+    username = Column(String(50), nullable=False, unique=True, index=True)
     name = Column(String(50), nullable=False)
-    phoneNumber = Column(String(15), nullable=False, unique=True, index=True )
     birthday = Column(String(10))
     country = Column(String(50))
     address = Column(String(100))
@@ -30,6 +30,8 @@ class Persondb(Base):
     # Define one-to-many relationship with WhatsApp table
     whatsappEntries = relationship('whatsAppdb', back_populates='person')
     TwitterEntries = relationship('Twitterdb', back_populates='person')
+    phoneNumbers = relationship('PhoneNumbers', back_populates='person')
+
 
 
     # functions stuff
@@ -39,7 +41,7 @@ class Persondb(Base):
 
         """
         try:
-            existingUser = session.query(Persondb).filter_by(phoneNumber=self.phoneNumber).first()
+            existingUser = session.query(Persondb).filter_by(username=self.username).first()
             if existingUser:
                 print("user Found")
                 return False
@@ -61,10 +63,17 @@ class Persondb(Base):
         """
         try:
             # Query the database for a person with the given phone number
-            person = session.query(Persondb).filter_by(phoneNumber=self.phoneNumber).first()
+            person = session.query(Persondb).filter_by(username=self.username).first()
             return person
         except:
             return False
+
+class PhoneNumbers(Base):
+    __tablename__ = 'phoneNumbers'
+    phoneNumbersId = Column(Integer, primary_key=True)
+    phoneNumber = Column(String(15), nullable=False, unique=True)
+    personId = Column(Integer, ForeignKey('person.userId'))
+    person = relationship('Persondb', back_populates='phoneNumbers')
 
 class whatsAppdb(Base):
     __tablename__ = 'whatsApp'
