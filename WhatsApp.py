@@ -45,15 +45,15 @@ class XPath():
 
 
 class WhatsApp(Person,XPath):
-    def __init__(self, phoneNumber=None, name=None):
+    def __init__(self, phoneNumber=None, name=None, username=None):
         self.logger = logger
         self.webdriverPath = webdriverPath
         self.profilePath = profilePath
         self.Xpath = XPath()
-        self.Person = Person(name=name,phoneNumber=phoneNumber)
+        self.person = Person(name=name,phoneNumber=phoneNumber, username=username)
         self.bussinessAcc = False # defualt value for normal ppl
         self.lastProfilePic = "Files/mano/whatApp/mano-2024-04-13-17:59:11.895772"
-        self.data = {'about':'','bigImageUrl':'','smallImageUrl':'','bussnissCover':'',}
+        self.data = {'about':'','newAbout':'','bigImageUrl':'','smallImageUrl':'','bussnissCover':'', }
         self.session = self.createClassSession()
         self.persondb = self.loadDatabaseData()
 
@@ -203,8 +203,8 @@ class WhatsApp(Person,XPath):
     def openContactViaUrl(self):
         try:
             print("hello")
-            print(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
-            self.driver.get(f'{self.Xpath.whatsAppUrl}/send?phone={self.Person.phoneNumber}')
+            print(f'{self.Xpath.whatsAppUrl}/send?phone={self.person.phoneNumber}')
+            self.driver.get(f'{self.Xpath.whatsAppUrl}/send?phone={self.person.phoneNumber}')
             WebDriverWait(self.driver, 240).until(EC.presence_of_element_located((By.XPATH, self.Xpath.contactDivXpath)))
             time.sleep(3)
             return True
@@ -218,7 +218,7 @@ class WhatsApp(Person,XPath):
             newChatElement.click()
             searchElement = self.findElementByXpath(self.Xpath.searchXpath)
             searchElement.click()
-            self.sendKeys(word=self.Person.phoneNumber)
+            self.sendKeys(word=self.person.phoneNumber)
             self.logger.info("done searching for contact ")
             time.sleep(3)
             return True
@@ -384,7 +384,7 @@ class WhatsApp(Person,XPath):
             return False
 
     def getAlluserInfo(self):
-        if self.Person.name and self.Person.phoneNumber:
+        if self.person.name and self.person.phoneNumber:
             contactDiv = self.checkIfElementIsLoadedByXpath(self.Xpath.contactDivXpath)
             if contactDiv:
                 self.openContact()
@@ -400,8 +400,8 @@ class WhatsApp(Person,XPath):
         
     def downloaImage(self,imgUrl):
         try:
-            if imgUrl and self.Person.name and SharedMethods.BaseClass.checkIfDir(f"Files/{self.Person.name}"): # ensure that the person has dir profile
-                ImgName = f'Files/{self.Person.name}/whatsApp/{self.Person.name}-{f"{datetime.now()}".replace(" ","-")}'
+            if imgUrl and self.person.name and SharedMethods.BaseClass.checkIfDir(f"Files/{self.person.name}"): # ensure that the person has dir profile
+                ImgName = f'Files/{self.person.name}/whatsApp/{self.person.name}-{f"{datetime.now()}".replace(" ","-")}'
                 Img = SharedMethods.Image(imageUrl=imgUrl, imageName=ImgName)
                 if Img.DownloadImage():
                     Img.GenerateImageHash()
@@ -453,7 +453,7 @@ class WhatsApp(Person,XPath):
 
     def createUserFoldar(self):
         try:
-            SharedMethods.BaseClass.makeDir(f"Files/{self.Person.name}/whatsApp")
+            SharedMethods.BaseClass.makeDir(f"Files/{self.person.name}/whatsApp")
             self.logger.info("Done making user whats foldar")
             return True
         except:
@@ -507,7 +507,7 @@ class WhatsApp(Person,XPath):
         try:
             if self.session:
                 # Query the database for user data based on phone number
-                userdata = self.session.query(Persondb).filter_by(phoneNumber=self.Person.phoneNumber).first()
+                userdata = self.session.query(Persondb).filter_by(username=self.person.username).first()
                 self.logger.info("User data loaded from the database")
                 return userdata
             else:
@@ -517,9 +517,33 @@ class WhatsApp(Person,XPath):
             self.logger.error(f"Error loading user data from database: {str(e)}")
             return False
 
-    def storeUserAbout(self, session, person, about):
-        pass
+    def getWhatsAppEntry(self, whatsappEntries):
+        entries = {entry.phoneNumber: entry for entry in whatsappEntries}
+        if self.person.phoneNumber in entries:
+                return entries[self.person.phoneNumber]
+        else:
+            # Handle case where WhatsApp entry is not found
+            return None
+
+
+    def changeUserAbout(self):
+        try:
+            # only if their is a new about data, which is made by changedAbout method  
+            currentAbout = self.data.get("newAbout")
+            if currentAbout and self.persondb:
+                whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
+                whatsData.currentAboutStatus = currentAbout
+            else:
+                # this means that about data is empty
+                self.logger.info("you need to get the about first and check if the user has changed it befor running the store to db")
+                return False
+        except:
+            self.logger.error("got an error while storing the about into db")
+            return False
+
 
 
 if __name__ == "__main__":
     print("hello")
+    # need to change the person to has more than one number first
+    
