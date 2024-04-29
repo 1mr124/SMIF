@@ -31,6 +31,7 @@ class Persondb(Base):
     whatsappEntries = relationship('whatsAppdb', back_populates='person')
     TwitterEntries = relationship('Twitterdb', back_populates='person')
     phoneNumbers = relationship('PhoneNumbers', back_populates='person')
+    spotifyEntries = relationship('Spotify', back_populates='person')
 
 
 
@@ -144,6 +145,18 @@ class bussnissDataLog(Base):
 
     whatsappUserId = Column(Integer, ForeignKey('whatsApp.whatsappUserId'))
     whatsAppUser = relationship('whatsAppdb', back_populates='bDataLog')
+
+
+class Spotify(Base):
+    __tablename__ = 'spotify'
+    Id = Column(Integer, primary_key=True)
+    personId = Column(Integer, ForeignKey('person.userId'))
+    playlistSongsNumber = Column(Integer)
+    storedDate = Column(DateTime, default=datetime.now)
+
+
+    person = relationship('Persondb', back_populates='spotifyEntries')
+
 
 
 class Twitterdb(Base):
