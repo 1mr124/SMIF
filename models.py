@@ -80,7 +80,7 @@ class whatsAppdb(Base):
     __tablename__ = 'whatsApp'
     whatsappUserId = Column(Integer, primary_key=True)
     currentProfilePic = Column(String(100))
-    currentAboutStatus = Column(String(140))
+    currentAbout = Column(String(140))
     
     currentbussinessCover = Column(String(100), nullable=True, default=None) 
     currentbussinessName = Column(String(50), nullable=True, default=None)

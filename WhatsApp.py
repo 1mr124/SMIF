@@ -488,10 +488,41 @@ class WhatsApp(Person,XPath):
         except:
             self.logger.error("error in monitoring online status")
 
-    def storeActiveStatus(self):
-        pass
+    def sameAboutBio(self):
+        '''
+            this method to check if the new about deffers from the last one
+            
+            Returns:
+                 bool: True if the about status bio has changed, False otherwise.
+    
+        '''
+        try:
+            if not self.persondb:
+                self.logger.error("No database entry found for this person.")
+                return None
+            
+            whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
 
-    def DownloadUserProfilePic(self):
+            if not whatsData:
+                self.logger.error("No WhatsApp entry found for this person.")
+                return None
+            
+            oldAboutBio = whatsData.currentAbout
+            newAboutBio = self.data.get("about")
+            if newAboutBio:
+                return newAboutBio == oldAboutBio # True if the same bio from the one in db false if it has been changed
+            else:
+                self.logger.error("no new about data")
+                return None
+        except Exception as e:
+            self.logger.error(f"Error in checking is the same about {e}")
+            return None    
+
+
+    def profilePicChanged(self):
+        '''
+            this method to check if the new profile pic deffers from the last one
+        '''
         pass
 
     # database section
@@ -532,7 +563,8 @@ class WhatsApp(Person,XPath):
             currentAbout = self.data.get("newAbout")
             if currentAbout and self.persondb:
                 whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
-                whatsData.currentAboutStatus = currentAbout
+                whatsData.currentAbout = currentAbout
+                return True
             else:
                 # this means that about data is empty
                 self.logger.info("you need to get the about first and check if the user has changed it befor running the store to db")
@@ -541,7 +573,23 @@ class WhatsApp(Person,XPath):
             self.logger.error("got an error while storing the about into db")
             return False
 
-
+    def monitorAbout(self):
+        sameAbout = self.sameAboutBio()
+        if sameAbout == False:
+            if not self.data.get('about'):
+                self.getAlluserInfo() # if no about data fetch new ones from the servers
+                
+            self.data['newAbout'] = self.data.get('about')
+            result = self.changeUserAbout()
+            if result:
+                return True # about has been changed just need to commit to db
+            else:
+                return False
+        else:
+            self.logger.info('user has the same about bio')
+    
+    def changeUserPic(self):
+        pass
 
 if __name__ == "__main__":
     print("hello")

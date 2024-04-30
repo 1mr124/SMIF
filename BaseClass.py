@@ -3,7 +3,6 @@ import os
 import subprocess
 import requests
 import hashlib
-from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.webdriver import WebDriver
@@ -120,5 +119,3 @@ class BaseClass:
             return WebDriver(service=Service(DriverPath), options=options)
         else:
             logger.error("Can't find Driver Path or profile directory")
-
-
