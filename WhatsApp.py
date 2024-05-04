@@ -34,7 +34,7 @@ class XPath():
         self.bussinessBigImage = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[2]/div/div/img'
         self.bussinessCoverDiv = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[1]/div'
         self.bussinessAboutDiv = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[3]'
-                                    
+        self.bussinessAbout = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[7]/div[2]/div/div/span/span'          
         self.bussinessName = '/html/body/div[1]/div/div/div[2]/div[5]/span/div/span/div/div/section/div[1]/div[3]/div[1]/div[2]/span'
                                 
 
@@ -52,7 +52,7 @@ class WhatsApp(Person,XPath):
         self.Xpath = XPath()
         self.person = Person(name=name,phoneNumber=phoneNumber, username=username)
         self.bussinessAcc = False # defualt value for normal ppl
-        self.data = {'about':'','newAbout':'','bigImageUrl':'','smallImageUrl':'','bussnissCover':'', }
+        self.data = {'about':'','bussnissAbout':'', 'newAbout':'','bigImageUrl':'','smallImageUrl':'','bussnissCover':'', }
         self.session = self.createClassSession()
         self.persondb = self.loadDatabaseData()
 
@@ -340,9 +340,12 @@ class WhatsApp(Person,XPath):
     def findBussinessAbout(self):
         if self.bussinessAcc:
             try:
-                aboutDivElement = self.findElementByXpath(self.Xpath.bussinessAboutDiv)
+                aboutDivElement = self.findElementByXpath(self.Xpath.bussinessAbout)
+                bussinessAboutElement = self.findElementByXpath(self.Xpath.bussinessAboutDiv)
                 if aboutDivElement:
                     aboutText = aboutDivElement.text
+                    bussinessAboutText = bussinessAboutElement.text
+                    self.data['bussnissAbout'] = bussinessAboutText
                     self.data['about'] = aboutText
                     self.logger.info("done finding about info")
             except:
@@ -682,4 +685,4 @@ class WhatsApp(Person,XPath):
 
 if __name__ == "__main__":
     print("hello")
-    
+    # storing about databse need to change
