@@ -5,9 +5,9 @@ from BaseClass import *
 logger = logSetup.log("SharedMethods","log.txt")
 
 class Image():
-    def __init__(self, imagePath=None, imageUrl=None, imageHash=None, imageName=None, listOfUrls=None):
+    def __init__(self, imageUrl=None, imageHash=None, imageName=None, listOfUrls=None):
         self.logger = logger
-        self.Path = imagePath
+        self.Path = imageName
         self.URL = imageUrl
         self.Hash = imageHash
         self.FileName = imageName
@@ -19,7 +19,6 @@ class Image():
         if BaseClass.checkResponseResult(response) and self.FileName:
             ImageData = response.content
             BaseClass.WriteImage(self.FileName, ImageData)
-            self.Path = self.FileName
             self.logger.info(f"Done saving the image {self.FileName}")
             return True
         else:
@@ -38,8 +37,9 @@ class Image():
                 self.logger.info("Done Downloading all the Images")
                 return True
 
-    def isTheSameImage(Image1, Image2):
+    def isTheSameImage(self, Image1, Image2):
         if not (Image1.Hash and Image2.Hash):
+            self.logger.info("one image has no Hash starting to generate hash for both")
             imag1Hash = Image1.GenerateImageHash()
             image2hash = Image2.GenerateImageHash()
         

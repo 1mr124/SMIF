@@ -52,7 +52,6 @@ class WhatsApp(Person,XPath):
         self.Xpath = XPath()
         self.person = Person(name=name,phoneNumber=phoneNumber, username=username)
         self.bussinessAcc = False # defualt value for normal ppl
-        self.lastProfilePic = "Files/mano/whatApp/mano-2024-04-13-17:59:11.895772"
         self.data = {'about':'','newAbout':'','bigImageUrl':'','smallImageUrl':'','bussnissCover':'', }
         self.session = self.createClassSession()
         self.persondb = self.loadDatabaseData()
@@ -202,8 +201,7 @@ class WhatsApp(Person,XPath):
 
     def openContactViaUrl(self):
         try:
-            print("hello")
-            print(f'{self.Xpath.whatsAppUrl}/send?phone={self.person.phoneNumber}')
+            self.logger.info(f'{self.Xpath.whatsAppUrl}/send?phone={self.person.phoneNumber}')
             self.driver.get(f'{self.Xpath.whatsAppUrl}/send?phone={self.person.phoneNumber}')
             WebDriverWait(self.driver, 240).until(EC.presence_of_element_located((By.XPATH, self.Xpath.contactDivXpath)))
             time.sleep(3)
@@ -398,10 +396,10 @@ class WhatsApp(Person,XPath):
             self.logger.error("can't find user name or phoneNumber")
             return False
         
-    def downloaImage(self,imgUrl):
+    def downloaImage(self, imgUrl, tempImage=False):
         try:
             if imgUrl and self.person.name and SharedMethods.BaseClass.checkIfDir(f"Files/{self.person.name}"): # ensure that the person has dir profile
-                ImgName = f'Files/{self.person.name}/whatsApp/{self.person.name}-{f"{datetime.now()}".replace(" ","-")}'
+                ImgName = f"Files/{self.person.name}/whatsApp/TempSmallImage" if tempImage else f'Files/{self.person.name}/whatsApp/{self.person.name}-{f"{datetime.now()}".replace(" ","-")}'
                 Img = SharedMethods.Image(imageUrl=imgUrl, imageName=ImgName)
                 if Img.DownloadImage():
                     Img.GenerateImageHash()
@@ -417,12 +415,10 @@ class WhatsApp(Person,XPath):
             return False
 
     def compareImages(self):
-        newSmallImg = self.downloaImage(self.data['smallImageUrl'])
         try:
             # fun to cmp the old with new
-            if newSmallImg:
-                oldImage = SharedMethods.Image(imageName="LastProfilePic", imagePath=self.lastProfilePic)
-                if SharedMethods.Image.isTheSameImage(oldImage,newSmallImg):
+            if self.newSmallImage and self.oldCurrentImage:
+                if SharedMethods.Image.isTheSameImage(self.oldCurrentImage, self.newSmallImage):
                     return False
                 else:
                     return True
@@ -431,25 +427,50 @@ class WhatsApp(Person,XPath):
         except:
             return "Faild"
         
-    def checkIfUserChagedProfilePic(self): # return True if user changed False if the same pic , Faild if theri is an error
+   
+    def sameProfilePic(self):
+        '''
+            Check if the new profile picture differs from the last one.
+            
+            Returns:
+                bool: True if the profile picture has changed, False otherwise.
+                None: If an error occurs during the process.        
+        '''
         try:
-            if self.data['smallImageUrl'] == '':
-                self.logger.info("the user doesn't has the small image link getting it ..... ")
-                self.findSmallImageUrl()
+            if not self.persondb:
+                self.logger.error("No database entry found for this person.")
+                return None
+            
+            whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
 
-            if self.data['smallImageUrl']:
+            if not whatsData:
+                self.logger.error("No WhatsApp entry found for this person.")
+                return None
+            
+            if not whatsData.currentProfilePic:
+                self.logger.info("no curretn profile image")
+                self.logger.info("storing the current as the current")
+                self.newBigImage = self.downloaImage(self.data.get('bigImageUrl'))
+                self.storeNewSmallImage()
+                self.storeNewBigImage()
+                return True
+            else:
+                self.oldCurrentImage = SharedMethods.Image(imageName=whatsData.currentProfilePic, imageHash=whatsData.currentHash, )
+        
+            if self.newSmallImage and self.oldCurrentImage:
+                self.logger.info("starting compairing the two images")
                 return self.compareImages()
             elif self.data['smallImageUrl'] == False:
                 # compare it with the last state to see if this is the defalut state
                 self.logger.info("The user has some Depression stuff")
-                self.data['removedPic'] = True
-                if self.lastProfilePic == False:
-                    return False
-                else:
+                if whatsData.currentProfilePic == False:
                     return True
-        except:
-            self.logger.error("Error while checking if the user has changed his pic")
-            return "Faild"
+                else:
+                    return False
+        except Exception as e:
+            self.logger.error(f"Error in checking is the same Pic {e}")
+            return None 
+
 
     def createUserFoldar(self):
         try:
@@ -479,7 +500,7 @@ class WhatsApp(Person,XPath):
             if isinstance(durationToRun, int) and isinstance(frequency, int):
                 startTime = time.time()
                 while time.time() - startTime < durationToRun:
-                    print("checking now")
+                    self.logger.info("checking now")
                     active = self.isActiveNow()
                     self.storeActiveStatus(active)
                     time.sleep(frequency)
@@ -519,12 +540,7 @@ class WhatsApp(Person,XPath):
             return None    
 
 
-    def profilePicChanged(self):
-        '''
-            this method to check if the new profile pic deffers from the last one
-        '''
-        pass
-
+    
     # database section
     def createClassSession(self):
         # Check if the database file exists
@@ -591,7 +607,79 @@ class WhatsApp(Person,XPath):
     def changeUserPic(self):
         pass
 
+    def monitorProfilePic(self):
+        bigImageUrl, smallImageUrl = self.data.get('bigImageUrl'), self.data.get('smallImageUrl')
+        self.newSmallImage = self.downloaImage(smallImageUrl, tempImage=True)
+        samePic = self.sameProfilePic()
+        if samePic == False:
+            if not (bigImageUrl and smallImageUrl):
+                self.getAlluserInfo() # if no about data fetch new ones from the servers
+
+            self.newBigImage =  self.downloaImage(bigImageUrl)
+            dbSmallResult = self.storeNewSmallImage()
+            dbBigResult = self.storeNewBigImage()
+            return dbSmallResult and dbBigResult
+        else:
+            self.logger.info('user has the same about Pic')
+    
+    def storeNewSmallImage(self):
+        """
+            Iterate over the arguments passed to the function.
+            
+            Args:
+                *args: Variable number of Images.
+                
+            Returns:
+                True if all is okay then u need to commit the db changes
+        """
+        if self.persondb:
+            whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
+        if self.newSmallImage.Hash and self.newSmallImage.FileName and whatsData:
+            whatsData.currentProfilePic = self.newSmallImage.FileName
+            whatsData.currentHash = self.newSmallImage.Hash
+            return True
+        elif self.newSmallImage == False:
+            whatsData.currentProfilePic = str(False)
+            whatsData.currentHash = str(False)
+        else:
+            return False
+        
+    def storeNewBigImage(self):
+        """
+            Iterate over the arguments passed to the function.
+            
+            Args:
+                *args: Variable number of Images.
+                
+            Returns:
+                True if all is okay then u need to commit the db changes
+        """
+        if self.persondb:
+            whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
+        if self.newBigImage.Hash and self.newBigImage.FileName and whatsData:
+            bigImage = profilePicsLog(picPath=self.newBigImage.FileName, picHash=self.newBigImage.Hash)
+            whatsData.profilePicLog.append(bigImage)
+            return True
+        elif self.newBigImage == False:
+            whatsData.currentProfilePic = str(False)
+            whatsData.currentHash = str(False)
+        else:
+            return False
+    
+    def addNewWhatsEntry(self):
+        try:
+            if self.persondb:
+                whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
+                if not whatsData:
+                    newWhats = whatsAppdb(phoneNumber=self.person.phoneNumber)
+                    self.persondb.whatsappEntries.append(newWhats)
+                    return True
+                else:
+                    self.logger.info("user is already has what's entry")
+        except Exception as e :
+            self.logger.error(f"error during add the whats entry: {e}")
+    
+
 if __name__ == "__main__":
     print("hello")
-    # need to change the person to has more than one number first
     

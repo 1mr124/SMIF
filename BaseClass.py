@@ -113,7 +113,6 @@ class BaseClass:
             options = Options()
             if HeadLess:
                 options.add_argument("-headless") 
-                print("headless")
             options.add_argument('--profile')
             options.add_argument(profilePath)
             return WebDriver(service=Service(DriverPath), options=options)

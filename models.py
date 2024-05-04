@@ -81,6 +81,7 @@ class whatsAppdb(Base):
     whatsappUserId = Column(Integer, primary_key=True)
     currentProfilePic = Column(String(100))
     currentAbout = Column(String(140))
+    currentHash = Column(String(32), nullable=True, unique=True)
     
     currentbussinessCover = Column(String(100), nullable=True, default=None) 
     currentbussinessName = Column(String(50), nullable=True, default=None)
@@ -131,6 +132,7 @@ class profilePicsLog(Base):
     picId = Column(Integer, primary_key=True)
     dateChanged = Column(DateTime , default = datetime.now())
     picPath = Column(String(100))
+    picHash = Column(String(32), nullable=False, unique=True)
 
     whatsappUserId = Column(Integer, ForeignKey('whatsApp.whatsappUserId'))
     whatsAppUser = relationship('whatsAppdb', back_populates='profilePicLog')
