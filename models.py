@@ -108,7 +108,7 @@ class onlineLog(Base):
     __tablename__ = 'onlineLog'
     logId = Column(Integer, primary_key=True)
     timeStamp = Column(DateTime, default=datetime.now)
-    status = Column(Boolean)
+    status = Column(Boolean, nullable=False)
 
     whatsappUserId = Column(Integer, ForeignKey('whatsApp.whatsappUserId'))
     whatsAppUser = relationship('whatsAppdb', back_populates='onlineLog')

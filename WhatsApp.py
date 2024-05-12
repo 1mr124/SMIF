@@ -502,10 +502,11 @@ class WhatsApp(Person,XPath):
         try:
             if isinstance(durationToRun, int) and isinstance(frequency, int):
                 startTime = time.time()
+                self.whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
                 while time.time() - startTime < durationToRun:
                     self.logger.info("checking now")
-                    active = self.isActiveNow()
-                    self.storeActiveStatus(active)
+                    activeResult = self.isActiveNow()
+                    self.storeActiveStatus(activeResult)
                     time.sleep(frequency)
             else:
                 self.logger.error("wtf the duration and freq is not int")
@@ -682,6 +683,11 @@ class WhatsApp(Person,XPath):
         except Exception as e :
             self.logger.error(f"error during add the whats entry: {e}")
     
+    def storeActiveStatus(self, activeResult): 
+        ''' store active log to db'''
+        if activeResult != 'False' and self.whatsData:
+            self.whatsData.onlineLog.append(onlineLog(status=activeResult))
+
 
 if __name__ == "__main__":
     print("hello")
