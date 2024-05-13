@@ -569,11 +569,17 @@ class WhatsApp(Person,XPath):
             return False
 
     def getWhatsAppEntry(self, whatsappEntries):
-        entries = {entry.phoneNumber: entry for entry in whatsappEntries}
+        if whatsappEntries:
+            entries = {entry.phoneNumber: entry for entry in whatsappEntries}
+        else:
+            return False
+        
         if self.person.phoneNumber in entries:
                 return entries[self.person.phoneNumber]
         else:
             # Handle case where WhatsApp entry is not found
+            self.logger.info("No DataBase is found, adding one")
+            #self.addNewWhatsEntry()
             return None
 
 
@@ -672,14 +678,17 @@ class WhatsApp(Person,XPath):
     
     def addNewWhatsEntry(self):
         try:
-            if self.persondb:
-                whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
-                if not whatsData:
-                    newWhats = whatsAppdb(phoneNumber=self.person.phoneNumber)
-                    self.persondb.whatsappEntries.append(newWhats)
-                    return True
-                else:
-                    self.logger.info("user is already has what's entry")
+            if not self.persondb:
+                self.logger.info("No Person Found so adding new one")
+                self.person.persondb.addPerson(self.session)
+            
+            whatsData = self.getWhatsAppEntry(self.persondb.whatsappEntries)
+            if not whatsData:
+                newWhats = whatsAppdb(phoneNumber=self.person.phoneNumber)
+                self.persondb.whatsappEntries.append(newWhats)
+                return True
+            else:
+                self.logger.info("user is already has what's entry")
         except Exception as e :
             self.logger.error(f"error during add the whats entry: {e}")
     
