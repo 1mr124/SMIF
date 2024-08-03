@@ -1,6 +1,16 @@
 #!/usr/bin/python3
 
 from BaseClass import * 
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+from cryptography.fernet import Fernet
+import base64
+import json
+import getpass 
+
 
 logger = logSetup.log("SharedMethods","log.txt")
 
@@ -74,6 +84,53 @@ class File:
     def GenerateFileHash(self):
         pass
 
+
+class Encrypt:
+    def __init__(self, password, filePath) -> None:
+        getpass.getpass = lambda prompt='': password
+        self.filePath = filePath
+        self.password = password
+
+    def generateKey(self, password):
+        salt = b'HopeIsLife'  # Salt for key derivation
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            iterations=100000,  # You can adjust the number of iterations as needed
+            salt=salt,
+            length=32,  # Key length (32 bytes for Fernet)
+            backend=default_backend()
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        return key
+
+
+    # Function to decrypt data with the provided key
+    def decryptData(self, data, key):
+        try:
+            cipher_suite = Fernet(key)
+            return cipher_suite.decrypt(data).decode()
+        except Exception as error:
+            print("Invalid key")
+            return None
+
+    def readEData(self, filename):
+        try:
+            with open(filename,"rb") as file:
+                loadedData = file.read()
+            return loadedData
+        except Exception as error:
+            print("Error while loading file")
+            return None
+    
+    def loadData(self):
+        passKey = self.generateKey(self.password)
+        loadedData =  self.readEData(self.filePath)
+        if loadedData:
+            data = self.decryptData(loadedData,passKey)
+            if data:
+                self.data = json.loads(data)
+                return self.data
+        return None
 
 if __name__ == "__main__":
     print("hello")
