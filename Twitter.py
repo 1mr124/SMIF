@@ -1,8 +1,8 @@
-#!/usr/bin/python3
-
 import SharedMethods
 from Person import *
 from models import *
+import requests
+from lxml import html
 
 webdriverPath = "/home/mr124/Documents/Projects/SMIF/geckodriver"
 profilePath =  "/home/mr124/Documents/Projects/SMIF/WhatsAppProfile"
@@ -42,9 +42,40 @@ class Twitter(Person):
 		print(self.apiToken)
 
 
+	# No API section 
+	def NoAPICheckIfProtectedAcc(self):
+		if not self.username:
+			self.logger.error("No username to check for")
+			return
+			
+		textToSearchFor="This account's tweets are protected."
+		xpath = '/html/body/div/div/div[3]/div/h2'
+		url = f"https://nitter.privacydev.net/{self.username}"
+		
+		try:
+			response= requests.get(url)
+			tree = html.fromstring(response.content)
+			elements = tree.xpath(xpath)
+
+			if elements and elements[0].text == textToSearchFor:
+				return True
+			else:
+				return False
+
+		except Exception as e:
+			self.logger.error("Error while getting the infos")
+			self.logger.error(e)
+		
+
 
 if __name__ == '__main__':
 	print('hello') 
 	#x = SharedMethods.BaseClass.CreatWebDriver(DriverPath=webdriverPath,profilePath=profilePath)
 	logger.info("Hello First Test")
-
+	user=input("Enter UserName: ")
+	x = Twitter(username=user)
+	result = x.NoAPICheckIfProtectedAcc()
+	if result:
+		print("Acc is Protected... x_x")
+	else:
+		print("Acc is Public.... ^_^")
