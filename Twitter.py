@@ -4,6 +4,7 @@ from models import *
 import requests
 from lxml import html
 import json
+import tweepy
 
 webdriverPath = "/home/mr124/Documents/Projects/SMIF/geckodriver"
 profilePath =  "/home/mr124/Documents/Projects/SMIF/WhatsAppProfile"
@@ -29,6 +30,7 @@ class Twitter(Person):
 			try:
 				encryptedData.loadData()
 				self.apiToken = encryptedData.data
+				self.logger.info("Done decryption ")
 			except Exception as e:
 				self.logger.error("Error in loading the api tokens")
 		else:
@@ -69,12 +71,12 @@ class Twitter(Person):
 			self.logger.error(e)
 
 	
-		
-
 if __name__ == '__main__':
 	print('hello') 
 	#x = SharedMethods.BaseClass.CreatWebDriver(DriverPath=webdriverPath,profilePath=profilePath)
 	logger.info("Hello First Test")
-	user=input("Enter UserName: ")
-	x = Twitter(username=user)
-	x.logger.info(x.getUserProfile())
+	#password = input("Enter Pass: ")
+	x = Twitter(username="mr12rewind")
+	#x.loadApiTokens()
+	print(x.getUserInfo())
+	
