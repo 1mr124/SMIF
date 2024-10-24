@@ -14,37 +14,6 @@ logger = logSetup.log("BaseClass","log.txt")
 class BaseClass:
 
     @staticmethod
-    def ReadFile(Path):
-        if BaseClass.checkIfFileExist(Path):
-            try:
-                with open(Path, 'r') as file:
-                    Lines = [line.strip() for line in file.readlines() if line.strip()]
-                    return Lines
-            except:
-                logger.error("Error in reading file {}".format(Path))
-        else:
-            logger.error("File does not exist")
-
-    @staticmethod
-    def makeDir(Path):
-        if os.path.isdir(Path):
-            return True
-        else:
-            os.makedirs(Path, exist_ok=True)
-            return True
-
-    @staticmethod
-    def checkIfFileExist(Path):
-        if Path:
-            return os.path.isfile(Path)
-        else:
-            return False
-    
-    @staticmethod
-    def checkIfDir(dirPath):
-        return os.path.isdir(dirPath)
-
-    @staticmethod
     def ExcuteCommand(command):
         return subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
@@ -58,14 +27,6 @@ class BaseClass:
         except:
             logger.error("command results doesn't have returecode")
 
-    @staticmethod
-    def writeToFile(FileName, Data):
-        with open(FileName, "a") as file:
-            if isinstance(Data, list):
-                for i in Data:
-                    file.write(i+'\n')
-            else:
-                file.write(Data+'\n')
     @staticmethod
     def WriteImage(FileName, Data):
         with open(FileName, "wb") as file:
