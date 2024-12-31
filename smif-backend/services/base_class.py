@@ -14,20 +14,6 @@ logger = logSetup.log("BaseClass","log.txt")
 class BaseClass:
 
     @staticmethod
-    def ExcuteCommand(command):
-        return subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-    @staticmethod
-    def checkCommandResult(result):
-        try:
-            if result.returncode == 0:
-                return True
-            else:
-                return False
-        except:
-            logger.error("command results doesn't have returecode")
-
-    @staticmethod
     def WriteImage(FileName, Data):
         with open(FileName, "wb") as file:
             file.write(Data)
