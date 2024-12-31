@@ -18,9 +18,6 @@ class BaseClass:
         with open(FileName, "wb") as file:
             file.write(Data)
 
-    @staticmethod
-    def sendRequest(url):
-        return requests.get(url)
 
     @staticmethod
     def chekcTool(tool):

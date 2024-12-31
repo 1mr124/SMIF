@@ -2,6 +2,8 @@ import subprocess
 from typing import Tuple
 import logSetup
 
+import shutil # built into python and requires no external dependencies - cross-platform 
+
 logger = logSetup.log("CommandsHandler", "log.txt")
 
 
@@ -49,3 +51,17 @@ class CommandsHandler:
         else:
             logger.warning(f"Command failed with return code: {return_code}")
             return False
+
+
+    @staticmethod
+    def is_tool_installed(tool_name: str) -> bool:
+        """
+            checks if the tool is installed or not 
+
+            Returns:
+                bool: True if the tool is installed, False otherwise
+
+        """
+        return shutil.which(tool_name) is not None
+
+    
