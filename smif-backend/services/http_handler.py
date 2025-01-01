@@ -43,7 +43,7 @@ class HttpHandler:
             raise RuntimeError(f"HTTP request failed: {str(e)}")
 
     @staticmethod
-    def check_response_status(response: requests.Response) -> bool:
+    def check_response_success_status(response: requests.Response) -> bool:
         """
         Checks if the response status code indicates success.
 
